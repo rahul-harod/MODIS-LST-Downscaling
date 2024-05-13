@@ -1,6 +1,6 @@
 streamlit
 streamlit-folium
-leafmap
 geemap
+leafmap
 wxee
 tensorflow==2.13.0
