@@ -13,7 +13,7 @@ from tensorflow.keras.models import model_from_json
 
 
 # Initialize Earth Engine
-ee.Initialize(project='rahul-gis')
+ee.Initialize()
 wxee.Initialize()
 
 # Set page configuration to wide
