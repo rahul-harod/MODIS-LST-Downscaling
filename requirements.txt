@@ -1,5 +1,6 @@
-ee                                                               
-streamlit                                                  
-leafmap                             
-geemap                                                           
+ee
+streamlit
+leafmap
+geemap
 wxee
+tensorflow==2.13.0
