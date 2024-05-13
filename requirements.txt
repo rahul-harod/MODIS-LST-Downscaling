@@ -1,5 +1,6 @@
 ee
 streamlit
+streamlit-folium
 leafmap
 geemap
 wxee
