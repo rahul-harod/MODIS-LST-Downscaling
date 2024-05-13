@@ -1,4 +1,3 @@
-ee
 streamlit
 streamlit-folium
 leafmap
