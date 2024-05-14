@@ -3,5 +3,5 @@ streamlit-folium
 geemap
 wxee
 joblib
-sklearn
+scikit-learn
 tensorflow==2.13.0
