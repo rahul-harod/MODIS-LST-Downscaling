@@ -9,8 +9,6 @@ from sklearn.preprocessing import StandardScaler
 from tensorflow.keras.models import model_from_json
 import streamlit as st
 import leafmap.foliumap as leafmap
-from streamlit_folium import folium_static
-import folium
 from google.oauth2 import service_account
 from ee import oauth
 
@@ -22,11 +20,7 @@ def get_auth():
     return 'Successfully sync to GEE'
     
 get_auth()    
-# ee.Authenticate()
-# ee.Initialize(project='ee-rharod4')
-# wxee.Initialize()
 
-# Set page configuration to wide
 # st.set_page_config(layout="wide")
 
 
