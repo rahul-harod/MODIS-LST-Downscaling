@@ -13,7 +13,9 @@ from ee import oauth
 
 "# LST Downscaling"
 def get_auth():
-    service_account_keys=st.secrets["type","project_id","private_key_id","private_key","client_email","client_id","auth_uri","token_uri","auth_provider_x509_cert_url","client_x509_cert_url","universe_domain"]
+    service_account_keys = {}
+    for key in ["type", "project_id", "private_key_id", "private_key", "client_email", "client_id", "auth_uri", "token_uri", "auth_provider_x509_cert_url", "client_x509_cert_url", "universe_domain"]:
+        service_account_keys[key] = st.secrets[key]
     credentials=service_account.Credentials.from_service_account_info(service_account_keys,scopes=oauth.SCOPES)
     ee.Initialize(credentials)
     return 'Successfully sync to GEE'
