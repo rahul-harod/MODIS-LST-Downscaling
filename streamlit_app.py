@@ -8,7 +8,6 @@ import joblib
 from sklearn.preprocessing import StandardScaler
 from tensorflow.keras.models import model_from_json
 import streamlit as st
-import leafmap
 from google.oauth2 import service_account
 from ee import oauth
 
@@ -119,7 +118,7 @@ def downscale(date, clip_roi, Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5):
     modisWithClosestLandsat = modis_ERA_Coll.map(lambda modisImage: findClosestLandsat(modisImage, landsat).addBands([elevation, DOY_image]))
     return modisWithClosestLandsat
 
-def Predictions(modisWithClosestLandsat,m):
+def Predictions(modisWithClosestLandsat):
     data = modisWithClosestLandsat.first().wx.to_xarray(scale=100, crs='EPSG:4326')
     df = data.to_dataframe()
     df.reset_index(inplace=True)
@@ -143,18 +142,26 @@ def Predictions(modisWithClosestLandsat,m):
     max_ = np.nanpercentile(df1['ANN_LST'], 99)
 
 
-    fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(12, 3.5))
-    im1 = ax1.imshow(merged_df['LST_Day_1km'], cmap='jet', vmin=min_, vmax=max_)
-    im2 = ax2.imshow(merged_df['ST_B10'], cmap='jet', vmin=min_, vmax=max_)
-    im3 = ax3.imshow(merged_df['ANN_LST'], cmap='jet', vmin=min_, vmax=max_)
+    fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(9, 3.5),gridspec_kw={"width_ratios":[1,1 ,0.05]})
+    fig.subplots_adjust(wspace=0.1))
+    im1=merged_df['LST_Day_1km'].plot(ax=ax1,cmap='jet',vmin=min_,vmax=max_)
+    im2=merged_df['ANN_LST'].plot(ax=ax2,cmap='jet',vmin=min_,vmax=max_)
 
     ax1.set_title('MODIS LST')
-    ax2.set_title('Landsat LST')
-    ax3.set_title('ANN LST')
+    ax2.set_title('ANN LST')
 
-    fig.colorbar(im1, ax=ax1, orientation='vertical', fraction=0.046, pad=0.04)
-    fig.colorbar(im2, ax=ax2, orientation='vertical', fraction=0.046, pad=0.04)
-    fig.colorbar(im3, ax=ax3, orientation='vertical', fraction=0.046, pad=0.04)
+    ip = InsetPosition(ax2, [1.05,0,0.05,1]) 
+    ax3.set_axes_locator(ip)
+    cbar=fig.colorbar(im3, cax=ax3, ax=[ax1,ax2])
+    cbar.set_label('LST in Kelvin', size=12)
+
+
+    for ax in (ax1, ax2):
+        ax.set_xticks([])
+        ax.set_yticks([])
+        ax.set_xlabel('')
+        ax.set_ylabel('')
+        plt.tight_layout()
 
     # Convert the plot to an image for displaying in Streamlit
     st.pyplot(fig)
@@ -192,10 +199,10 @@ def user_input_map(lat, lon, buffer_size, date):
         date_str = date.strftime('%Y-%m-%d')
         
         # Create a Map object
-        m = leafmap.Map(center=[lat, lon], zoom=6)
+        # m = leafmap.Map(center=[lat, lon], zoom=6)
 
-        # Add a basemap
-        m.add_basemap('HYBRID')
+        # # Add a basemap
+        # m.add_basemap('HYBRID')
         
         # Create a point geometry
         point = ee.Geometry.Point(lon, lat)
@@ -204,9 +211,9 @@ def user_input_map(lat, lon, buffer_size, date):
         clip_roi = point.buffer(buffer_size).bounds()
         
         # Display the map in Streamlit
-        m.to_streamlit()
+        # m.to_streamlit()
 
-        return clip_roi, date_str,m
+        return clip_roi, date_str
     except Exception as e:
         st.error(f"An error occurred: {str(e)}")
 
@@ -221,9 +228,9 @@ def main():
     
     # Run the code when the user clicks the button
     if st.sidebar.button("Submit"):
-        clip_roi,date_str,m=user_input_map(lat, lon, radius, date_input)
+        clip_roi,date_str=user_input_map(lat, lon, radius, date_input)
         modisWithClosestLandsat = downscale(date_str, clip_roi, Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5)
-        Predictions(modisWithClosestLandsat,m)
+        Predictions(modisWithClosestLandsat)
         st.sidebar.success("Code execution completed successfully!")
 
 if __name__ == "__main__":
