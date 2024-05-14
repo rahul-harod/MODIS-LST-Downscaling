@@ -17,7 +17,7 @@ with st.echo():
     import ee
     
 def get_auth():
-    service_account_keys=st.secrets["ee_keys"]
+    service_account_keys=st.secrets["private_key"]
     credentials=service_account.Credentials.from_service_account_info(service_account_keys,scopes=oauth.SCOPES)
     ee.Initialize(credentials)
     return 'Successfully sync to GEE'
