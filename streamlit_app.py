@@ -120,6 +120,11 @@ def downscale(date, clip_roi, Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5):
     modisWithClosestLandsat = modis_ERA_Coll.map(lambda modisImage: findClosestLandsat(modisImage, landsat).addBands([elevation, DOY_image]))
     return modisWithClosestLandsat
 
+
+def download_nc(ds):
+    ds.to_netcdf("Downscaled_lst.nc", mode="w")
+    st.success("Downloaded predicted_lst.nc")
+    
 def Predictions(modisWithClosestLandsat):
     data = modisWithClosestLandsat.first().wx.to_xarray(scale=100, crs='EPSG:4326')
     df = data.to_dataframe()
@@ -161,6 +166,7 @@ def Predictions(modisWithClosestLandsat):
     
     # Convert the plot to an image for displaying in Streamlit
     st.pyplot(fig)
+    st.download_button(label="Download Rasters", data=download_nc(data[['LST_Day_1km','ANN_LST']]), file_name='Downscaled_lst.nc', mime='application/x-netcdf')
     pass
 
 
