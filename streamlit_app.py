@@ -19,7 +19,7 @@ with st.echo():
 
 # ee.Authenticate()
 # ee.Initialize(project='ee-rharod4')
-wxee.Initialize()
+# wxee.Initialize()
 
 # Set page configuration to wide
 st.set_page_config(layout="wide")
