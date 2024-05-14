@@ -1,9 +1,6 @@
+leafmap
 streamlit
 streamlit-folium
-folium==0.13.0
-geopandas
-leafmap
-streamlit-bokeh-events
 geemap
 wxee
 tensorflow==2.13.0
