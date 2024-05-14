@@ -2,4 +2,6 @@ streamlit
 streamlit-folium
 geemap
 wxee
+joblib
+sklearn
 tensorflow==2.13.0
