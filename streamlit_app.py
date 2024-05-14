@@ -2,6 +2,7 @@ import wxee
 import ee
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1.inset_locator import InsetPosition
 import pandas as pd
 import os
 import joblib
@@ -140,29 +141,27 @@ def Predictions(modisWithClosestLandsat):
     # Plot multiple images in subplots
     min_ = np.nanpercentile(df1['ANN_LST'], 1)
     max_ = np.nanpercentile(df1['ANN_LST'], 99)
-
-
-    fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(9, 3.5),gridspec_kw={"width_ratios":[1,1 ,0.05]})
+    
+    fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(9, 3.5), gridspec_kw={"width_ratios": [1, 1, 0.05]})
     fig.subplots_adjust(wspace=0.1)
-    im1=merged_df['LST_Day_1km'].plot(ax=ax1,cmap='jet',vmin=min_,vmax=max_)
-    im2=merged_df['ANN_LST'].plot(ax=ax2,cmap='jet',vmin=min_,vmax=max_)
-
+    im1 = merged_df['LST_Day_1km'].plot(ax=ax1, cmap='jet', vmin=min_, vmax=max_)
+    im2 = merged_df['ANN_LST'].plot(ax=ax2, cmap='jet', vmin=min_, vmax=max_)
+    
     ax1.set_title('MODIS LST')
     ax2.set_title('ANN LST')
-
-    ip = InsetPosition(ax2, [1.05,0,0.05,1]) 
+    
+    ip = InsetPosition(ax2, [1.05, 0, 0.05, 1])
     ax3.set_axes_locator(ip)
-    cbar=fig.colorbar(im3, cax=ax3, ax=[ax1,ax2])
+    cbar = fig.colorbar(im2, cax=ax3, ax=[ax1, ax2])
     cbar.set_label('LST in Kelvin', size=12)
-
-
+    
     for ax in (ax1, ax2):
         ax.set_xticks([])
         ax.set_yticks([])
         ax.set_xlabel('')
         ax.set_ylabel('')
         plt.tight_layout()
-
+    
     # Convert the plot to an image for displaying in Streamlit
     st.pyplot(fig)
     pass
