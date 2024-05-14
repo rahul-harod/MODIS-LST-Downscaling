@@ -1,6 +1,5 @@
 import ee
 import streamlit as st
-import geemap
 import wxee
 import numpy as np
 import matplotlib.pyplot as plt
