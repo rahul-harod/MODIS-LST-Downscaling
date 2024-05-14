@@ -21,7 +21,7 @@ with st.echo():
 # wxee.Initialize()
 
 # Set page configuration to wide
-st.set_page_config(layout="wide")
+# st.set_page_config(layout="wide")
 
 
 # Initialize global variables
