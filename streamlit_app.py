@@ -1,4 +1,5 @@
 import wxee
+import base64
 import ee
 import numpy as np
 import matplotlib.pyplot as plt
