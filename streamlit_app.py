@@ -9,7 +9,7 @@ import streamlit as st
 from streamlit_folium import folium_static
 import folium
 
-"# streamlit-geemap"
+"# LST Downscaling"
 
 with st.echo():
     import streamlit as st
