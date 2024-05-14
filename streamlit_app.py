@@ -11,7 +11,7 @@ from tensorflow.keras.models import model_from_json
 
 
 ee.Authenticate()
-ee.Initialize(project='rahul-gis')
+ee.Initialize(project='ee-rharod4')
 wxee.Initialize()
 
 # Set page configuration to wide
