@@ -1,4 +1,4 @@
-python==3.11
+python==3.11.8
 leafmap
 streamlit
 streamlit-folium
