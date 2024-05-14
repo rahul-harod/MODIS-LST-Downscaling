@@ -136,31 +136,21 @@ def Predictions(modisWithClosestLandsat):
     merged_df.set_index(['y', 'x'], inplace=True)
     merged_df = merged_df.to_xarray()
     data['ANN_LST'] = merged_df['ANN_LST']
-    data['ANN_LST'].attrs = {'long_name': 'ANN_LST', 'AREA_OR_POINT': 'Area', 'grid_mapping': 'spatial_ref'}
+    data['ANN_LST'].attrs = {'long_name': 'LST (K)', 'AREA_OR_POINT': 'Area', 'grid_mapping': 'spatial_ref'}
+    data['LST_Day_1km'].attrs = {'long_name': 'LST (K)', 'AREA_OR_POINT': 'Area', 'grid_mapping': 'spatial_ref'}
     
     # Plot multiple images in subplots
     min_ = np.nanpercentile(df1['ANN_LST'], 1)
     max_ = np.nanpercentile(df1['ANN_LST'], 99)
     
-    fig, (ax1, ax2, ax3) = plt.subplots(ncols=3, figsize=(7, 3.5), gridspec_kw={"width_ratios": [1, 1, 0.05]})
+    fig, (ax1, ax2) = plt.subplots(1,2, figsize=(7, 3))
     fig.subplots_adjust(wspace=0.1)
     im1 = data['LST_Day_1km'].plot(ax=ax1, cmap='jet', vmin=min_, vmax=max_)
     im2 = data['ANN_LST'].plot(ax=ax2, cmap='jet', vmin=min_, vmax=max_)
     
     ax1.set_title('MODIS LST')
     ax2.set_title('ANN LST')
-    
-    ip = InsetPosition(ax2, [1.05, 0, 0.05, 1])
-    ax3.set_axes_locator(ip)
-    
-    cbar1 = fig.colorbar(im1, ax=ax1)
-    cbar2 = fig.colorbar(im2, ax=ax2)
-    cbar1.remove()
-    cbar2.remove()
-    
-    cbar = fig.colorbar(im2, cax=ax3, ax=[ax1, ax2])
-    cbar.set_label('LST in Kelvin', size=12)
-    
+
     for ax in (ax1, ax2):
         # ax.set_xticks([])
         # ax.set_yticks([])
