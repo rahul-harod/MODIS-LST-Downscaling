@@ -15,7 +15,6 @@ with st.echo():
     import streamlit as st
     from streamlit_folium import folium_static
     import ee
-    import geemap.eefolium as geemap
 
 # ee.Authenticate()
 # ee.Initialize(project='ee-rharod4')
