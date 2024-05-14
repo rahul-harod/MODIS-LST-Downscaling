@@ -5,4 +5,5 @@ wxee
 tqdm
 joblib
 scikit-learn
+leafmap
 tensorflow==2.13.0
