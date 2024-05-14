@@ -1,4 +1,3 @@
-leafmap==0.32.0
 streamlit
 streamlit-folium
 geemap
