@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import os
 import joblib
-import sklearn
+from sklearn.preprocessing import StandardScaler
 from tensorflow.keras.models import model_from_json
 import streamlit as st
 from streamlit_folium import folium_static
