@@ -10,4 +10,5 @@ tqdm
 joblib
 scikit-learn
 tensorflow==2.13.0
+typing-extensions
 # git+https://github.com/giswqs/leafmap
