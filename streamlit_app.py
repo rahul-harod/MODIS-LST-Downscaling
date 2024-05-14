@@ -122,18 +122,9 @@ def downscale(date, clip_roi, Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5):
 
 
 def get_nc_download_link(ds, file_name='data.nc'):
-    """
-    Generates a link allowing the data in a given xarray dataset to be downloaded as a NetCDF file.
-
-    Parameters:
-    - data (xarray.Dataset or xarray.DataArray): The xarray dataset or data array to be downloaded.
-    - file_name (str): The desired file name for the downloaded NetCDF file.
-
-    Returns:
-    - href (str): The HTML string containing the hyperlink for downloading the NetCDF file.
-    """
     nc_bytes = ds.to_netcdf()  # Convert xarray dataset to NetCDF bytes
-    href = f'<a href="data:file/nc;base64,{nc_bytes}" download="{file_name}">Download NetCDF file</a>'
+    nc_b64 = base64.b64encode(nc_bytes).decode()  # Encode NetCDF bytes to base64
+    href = f'<a href="data:file/nc;base64,{nc_b64}" download="{file_name}">Download NetCDF file</a>'
     return href
 
     
