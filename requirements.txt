@@ -3,7 +3,7 @@ streamlit-folium
 geopandas
 jupyter-server-proxy
 keplergl
-leafmap
+leafmap==0.32.1
 geemap
 wxee
 tqdm
