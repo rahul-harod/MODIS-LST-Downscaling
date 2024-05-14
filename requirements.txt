@@ -5,5 +5,5 @@ wxee
 tqdm
 joblib
 scikit-learn
-leafmap
+git+git://github.com/giswqs/leafmap
 tensorflow==2.13.0
