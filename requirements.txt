@@ -3,7 +3,7 @@ streamlit-folium
 geopandas
 jupyter-server-proxy
 keplergl
-typing-extensions==4.11.0
+typing-extensions
 leafmap==0.32.1
 geemap
 wxee
@@ -11,5 +11,4 @@ tqdm
 joblib
 scikit-learn
 tensorflow==2.13.0
-typing-extensions
 # git+https://github.com/giswqs/leafmap
