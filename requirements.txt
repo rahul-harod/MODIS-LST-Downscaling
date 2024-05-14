@@ -6,6 +6,6 @@ wxee
 tqdm
 joblib
 scikit-learn
-tensorflow
+tensorflow==2.14.0
 typing-extensions==4.11.0
 # git+https://github.com/giswqs/leafmap
