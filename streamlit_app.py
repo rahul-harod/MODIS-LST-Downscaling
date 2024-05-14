@@ -9,7 +9,7 @@ import streamlit as st
 from streamlit_folium import folium_static
 import folium
 from google.oauth2 import service_account
-
+from ee import oauth
 
 "# LST Downscaling"
 
