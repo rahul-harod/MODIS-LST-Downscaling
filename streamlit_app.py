@@ -23,9 +23,6 @@ def get_auth():
     
 get_auth()    
 
-# st.set_page_config(layout="wide")
-
-
 # Initialize global variables
 targetProjection = ee.Projection('EPSG:32643')
 ERA5 = ee.ImageCollection("ECMWF/ERA5_LAND/HOURLY")
@@ -122,14 +119,14 @@ def downscale(date, clip_roi, Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5):
     return modisWithClosestLandsat
 
 
-def get_nc_download_link(ds, file_name='data.nc'):
+def get_nc_download_link(ds, file_name='Downscaled_LST.nc'):
     nc_bytes = ds.to_netcdf()  # Convert xarray dataset to NetCDF bytes
     nc_b64 = base64.b64encode(nc_bytes).decode()  # Encode NetCDF bytes to base64
     href = f'<a href="data:file/nc;base64,{nc_b64}" download="{file_name}">Download NetCDF file</a>'
     return href
 
     
-def Predictions(modisWithClosestLandsat):
+def Predictions(modisWithClosestLandsat,date_str):
     data = modisWithClosestLandsat.first().wx.to_xarray(scale=100, crs='EPSG:4326')
     df = data.to_dataframe()
     df.reset_index(inplace=True)
@@ -170,35 +167,8 @@ def Predictions(modisWithClosestLandsat):
     
     # Convert the plot to an image for displaying in Streamlit
     st.pyplot(fig)
-    st.markdown(get_nc_download_link(data[['LST_Day_1km','ANN_LST']]), unsafe_allow_html=True)
+    st.markdown(get_nc_download_link(data[['LST_Day_1km','ANN_LST']],file_name='Aqua_Day_Downscaled_LST_'+date_str+'.nc'), unsafe_allow_html=True)
     pass
-
-
-
-# # Streamlit app# Function to process user input and run the code
-# def user_input_map(lat, lon, radius, date):
-#     try:
-#         date_str = date.strftime('%Y-%m-%d')
-#         # Create a Map object
-        # Map = geemap.Map()
-        # Map.add_basemap("HYBRID")
-        
-#         # Create a point feature
-#         point = ee.Geometry.Point(lon, lat)
-        
-#         # Create a buffer around the point
-#         clip_roi = point.buffer(radius).bounds()
-#         Map.center_object(clip_roi, 9)
-        
-#         # Add the buffer region to the map
-#         Map.addLayer(clip_roi, {'color': 'red'}, 'ROI')
-        
-#         # Display the map in Streamlit
-#         Map.to_streamlit(height=600)
-        
-#         return clip_roi,date_str, Map
-#     except Exception as e:
-#         st.error(f"An error occurred: {str(e)}")
 
 def user_input_map(lat, lon, buffer_size, date):
     try:
@@ -236,7 +206,7 @@ def main():
     if st.sidebar.button("Submit"):
         clip_roi,date_str=user_input_map(lat, lon, radius, date_input)
         modisWithClosestLandsat = downscale(date_str, clip_roi, Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5)
-        Predictions(modisWithClosestLandsat)
+        Predictions(modisWithClosestLandsat,date_str)
         st.sidebar.success("Code execution completed successfully!")
 
 if __name__ == "__main__":
