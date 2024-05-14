@@ -6,7 +6,7 @@ from mpl_toolkits.axes_grid1.inset_locator import InsetPosition
 import pandas as pd
 import os
 import joblib
-import leafmap
+# import leafmap
 from sklearn.preprocessing import StandardScaler
 from tensorflow.keras.models import model_from_json
 import streamlit as st
