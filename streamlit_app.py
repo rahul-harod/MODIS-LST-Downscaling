@@ -178,7 +178,6 @@ def Predictions(modisWithClosestLandsat):
     
     # Convert the plot to an image for displaying in Streamlit
     st.pyplot(fig)
-    download_nc(data)
     st.markdown(get_nc_download_link(data), unsafe_allow_html=True)
     pass
 
