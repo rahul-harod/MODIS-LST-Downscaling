@@ -1,5 +1,3 @@
-import ee
-import streamlit as st
 import wxee
 import numpy as np
 import matplotlib.pyplot as plt
@@ -7,8 +5,17 @@ import pandas as pd
 import os
 import joblib
 from tensorflow.keras.models import model_from_json
+import streamlit as st
+from streamlit_folium import folium_static
+import folium
 
+"# streamlit-geemap"
 
+with st.echo():
+    import streamlit as st
+    from streamlit_folium import folium_static
+    import ee
+    import geemap.eefolium as geemap
 
 # ee.Authenticate()
 # ee.Initialize(project='ee-rharod4')
