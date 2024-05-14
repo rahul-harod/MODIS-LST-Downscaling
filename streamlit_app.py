@@ -8,6 +8,7 @@ import joblib
 from sklearn.preprocessing import StandardScaler
 from tensorflow.keras.models import model_from_json
 import streamlit as st
+import leafmap
 from streamlit_folium import folium_static
 import folium
 from google.oauth2 import service_account
