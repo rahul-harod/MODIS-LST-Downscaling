@@ -144,7 +144,7 @@ def Predictions(modisWithClosestLandsat):
     max_ = np.nanpercentile(df1['ANN_LST'], 99)
     
     fig, (ax1, ax2) = plt.subplots(1,2, figsize=(7, 3))
-    fig.subplots_adjust(wspace=0.1)
+    fig.subplots_adjust(wspace=0.2)
     im1 = data['LST_Day_1km'].plot(ax=ax1, cmap='jet', vmin=min_, vmax=max_)
     im2 = data['ANN_LST'].plot(ax=ax2, cmap='jet', vmin=min_, vmax=max_)
     
