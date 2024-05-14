@@ -15,7 +15,14 @@ with st.echo():
     import streamlit as st
     from streamlit_folium import folium_static
     import ee
-
+    
+def get_auth():
+    service_account_keys=st.secrets["ee_keys"]
+    credentials=service_account.Credentials.from_service_account_info(service_account_keys,scopes=oauth.SCOPES)
+    ee.Initialize(credentials)
+    return 'Successfully sync to GEE'
+    
+get_auth()    
 # ee.Authenticate()
 # ee.Initialize(project='ee-rharod4')
 # wxee.Initialize()
