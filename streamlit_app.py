@@ -1,6 +1,6 @@
 import ee
 import streamlit as st
-import leafmap as leafmap
+# import leafmap as leafmap
 # import leafmap.foliumap as leafmap
 import geemap
 import wxee
@@ -117,7 +117,7 @@ def downscale(date, clip_roi, Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5):
     modisWithClosestLandsat = modis_ERA_Coll.map(lambda modisImage: findClosestLandsat(modisImage, landsat).addBands([elevation, DOY_image]))
     return modisWithClosestLandsat
 
-def Predictions(modisWithClosestLandsat,m):
+def Predictions(modisWithClosestLandsat):
     data = modisWithClosestLandsat.first().wx.to_xarray(scale=100, crs='EPSG:4326')
     df = data.to_dataframe()
     df.reset_index(inplace=True)
@@ -184,8 +184,8 @@ def Predictions(modisWithClosestLandsat,m):
 #     try:
 #         date_str = date.strftime('%Y-%m-%d')
 #         # Create a Map object
-#         Map = geemap.Map()
-#         Map.add_basemap("HYBRID")
+        # Map = geemap.Map()
+        # Map.add_basemap("HYBRID")
         
 #         # Create a point feature
 #         point = ee.Geometry.Point(lon, lat)
@@ -209,10 +209,10 @@ def user_input_map(lat, lon, buffer_size, date):
         date_str = date.strftime('%Y-%m-%d')
         
         # Create a Map object
-        m = leafmap.Map(center=[lat, lon], zoom=6)
+        # m = leafmap.Map(center=[lat, lon], zoom=6)
 
-        # Add a basemap
-        m.add_basemap('HYBRID')
+        # # Add a basemap
+        # m.add_basemap('HYBRID')
         
         # Create a point geometry
         point = ee.Geometry.Point(lon, lat)
@@ -221,9 +221,9 @@ def user_input_map(lat, lon, buffer_size, date):
         clip_roi = point.buffer(buffer_size).bounds()
         
         # Display the map in Streamlit
-        m.to_streamlit()
+        # m.to_streamlit()
 
-        return clip_roi, date_str, m
+        return clip_roi, date_str
     except Exception as e:
         st.error(f"An error occurred: {str(e)}")
 
@@ -238,9 +238,9 @@ def main():
     
     # Run the code when the user clicks the button
     if st.sidebar.button("Submit"):
-        clip_roi,date_str,m=user_input_map(lat, lon, radius, date_input)
+        clip_roi,date_str=user_input_map(lat, lon, radius, date_input)
         modisWithClosestLandsat = downscale(date_str, clip_roi, Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5)
-        Predictions(modisWithClosestLandsat,m)
+        Predictions(modisWithClosestLandsat)
         st.sidebar.success("Code execution completed successfully!")
 
 if __name__ == "__main__":
