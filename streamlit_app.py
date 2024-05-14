@@ -1,7 +1,5 @@
 import ee
 import streamlit as st
-# import leafmap as leafmap
-# import leafmap.foliumap as leafmap
 import geemap
 import wxee
 import numpy as np
