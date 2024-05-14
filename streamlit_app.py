@@ -167,7 +167,7 @@ def Predictions(modisWithClosestLandsat):
     
     # Convert the plot to an image for displaying in Streamlit
     st.pyplot(fig)
-    st.download_button(label="Download Rasters", data=download_nc(data), args=(data[['LST_Day_1km','ANN_LST']],), file_name='Downscaled_lst.nc')
+    st.download_button(label="Download Rasters", data=download_nc, args=(data[['LST_Day_1km','ANN_LST']],), file_name='Downscaled_lst.nc')
     pass
 
 
