@@ -1,9 +1,7 @@
 streamlit
 streamlit-folium
 geopandas
-jupyter-server-proxy
-keplergl
-geemap
+leafmap
 wxee
 tqdm
 joblib
