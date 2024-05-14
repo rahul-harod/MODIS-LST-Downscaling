@@ -121,10 +121,21 @@ def downscale(date, clip_roi, Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5):
     return modisWithClosestLandsat
 
 
-def download_nc(ds):
-    with open("Downscaled_lst.nc", "wb") as f:
-        ds.to_netcdf(f)
-    st.success("Downloaded predicted_lst.nc")
+def get_nc_download_link(data, file_name='data.nc'):
+    """
+    Generates a link allowing the data in a given xarray dataset to be downloaded as a NetCDF file.
+
+    Parameters:
+    - data (xarray.Dataset or xarray.DataArray): The xarray dataset or data array to be downloaded.
+    - file_name (str): The desired file name for the downloaded NetCDF file.
+
+    Returns:
+    - href (str): The HTML string containing the hyperlink for downloading the NetCDF file.
+    """
+    nc_bytes = data.to_netcdf()  # Convert xarray dataset to NetCDF bytes
+    href = f'<a href="data:file/nc;base64,{nc_bytes}" download="{file_name}">Download NetCDF file</a>'
+    return href
+
     
 def Predictions(modisWithClosestLandsat):
     data = modisWithClosestLandsat.first().wx.to_xarray(scale=100, crs='EPSG:4326')
@@ -168,7 +179,7 @@ def Predictions(modisWithClosestLandsat):
     # Convert the plot to an image for displaying in Streamlit
     st.pyplot(fig)
     download_nc(data)
-    # st.download_button(label="Download Rasters", data=download_nc, file_name='Downscaled_lst.nc')
+    st.markdown(get_nc_download_link(data), unsafe_allow_html=True)
     pass
 
 
