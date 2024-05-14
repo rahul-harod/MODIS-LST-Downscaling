@@ -8,7 +8,7 @@ import joblib
 from sklearn.preprocessing import StandardScaler
 from tensorflow.keras.models import model_from_json
 import streamlit as st
-import leafmap.foliumap as leafmap
+import leafmap
 from google.oauth2 import service_account
 from ee import oauth
 
