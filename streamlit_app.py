@@ -21,7 +21,7 @@ def get_auth():
     
 get_auth()    
 
-st.set_page_config(layout="wide")
+# st.set_page_config(layout="wide")
 
 
 # Initialize global variables
