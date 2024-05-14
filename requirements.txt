@@ -1,5 +1,4 @@
-python==3.11.8
-leafmap
+leafmap==0.32.0
 streamlit
 streamlit-folium
 geemap
