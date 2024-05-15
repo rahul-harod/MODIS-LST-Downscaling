@@ -102,18 +102,6 @@ def load_model_and_scaler_ResNet(model_name,num_rows, num_Columns, n_bands):
         
 
 
-# scaler_X = joblib.load(r"ANN_72_scaler_X.pkl")
-# scaler_y = joblib.load(r"ANN_72_scaler_y.pkl")
-
-# with open(r"ANN_72_Model_Arc.json", "r") as json_file:
-#     loaded_model_json = json_file.read()
-
-# best_model = model_from_json(loaded_model_json)
-# best_model.load_weights(r"ANN_72_Model_Weights.h5")
-
-bands=['DOY','Elevation', 'SR_B4','sur_refl_b07', 'SSRDH', 'NDVI','NDBI','LST_Day_1km']
-
-
 def LandsatUpscale(img):
     return img.reduceResolution(reducer=ee.Reducer.mean(), maxPixels=1024).reproject(crs=targetProjection, scale=100)
 
@@ -211,7 +199,7 @@ def get_png_download_link(f, file_name='Downscaled_LST_Map.png'):
     return href
 
     
-def Predictions(modisWithClosestLandsat,date_str,selected_lst_type):
+def Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_model):
     data = modisWithClosestLandsat.first().wx.to_xarray(scale=100, crs='EPSG:4326')
     df = data.to_dataframe()
     df.reset_index(inplace=True)
@@ -219,8 +207,10 @@ def Predictions(modisWithClosestLandsat,date_str,selected_lst_type):
     df.rename(columns={'surface_solar_radiation_downwards_hourly': 'SSRDH'}, inplace=True)
     df1 = df[bands]
     df1.dropna(inplace=True)
-
-    X_test = scaler_X.transform(df1[bands])
+    
+    load_model_and_scaler_ANN(selected_model)
+    bands_ANN=['DOY','Elevation', 'SR_B4','sur_refl_b07', 'SSRDH', 'NDVI','NDBI','LST_Day_1km']
+    X_test = scaler_X.transform(df1[bands_ANN])
     y_pred = best_model.predict(X_test)
     df1['ANN_LST'] = scaler_y.inverse_transform(y_pred)
 
@@ -300,7 +290,6 @@ def main():
 
     Model_types = ['ANN_L2', 'ANN_SMWA','ResNet_SMWA']
     selected_model = st.sidebar.selectbox("Select Model", Model_types, index=Model_types.index(selected_model))
-    load_model_and_scaler_ANN(selected_model)
 
     # Update variables based on the selected LST type
     Modis = ee.ImageCollection(lst_paths[selected_lst_type]['Modis'])
@@ -314,7 +303,12 @@ def main():
     if st.sidebar.button("Submit"):
         clip_roi,date_str=user_input_map(lat, lon, radius, date_input)
         modisWithClosestLandsat = downscale(date_str, clip_roi, Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5,ERA_hour,LST_band)
-        Predictions(modisWithClosestLandsat,date_str,selected_lst_type)
+        if selected_model in ['ANN_L2', 'ANN_SMWA']:
+            Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_model)
+            
+        if selected_model in ['ResNet_SMWA', 'ResNet_L2']:
+            load_model_and_scaler_ResNet(selected_model,num_rows, num_Columns, n_bands)
+            Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_model)
         st.sidebar.success("Code execution completed successfully!")
 
 if __name__ == "__main__":
