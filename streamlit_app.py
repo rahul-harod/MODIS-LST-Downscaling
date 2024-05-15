@@ -159,7 +159,7 @@ def Predictions(modisWithClosestLandsat,date_str):
     ax2.set_title('ANN LST')
     ip = InsetPosition(ax2, [1.05,0,0.05,1]) 
     cax.set_axes_locator(ip)
-    cbar=f.colorbar(im2, cax=cax, ax=[ax1,ax2])
+    cbar=fig.colorbar(im2, cax=cax, ax=[ax1,ax2])
     cbar.set_label('LST in Kelvin', size=12)
 
     for ax in (ax1, ax2):
