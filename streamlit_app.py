@@ -259,6 +259,7 @@ def Predictions_ResNet(modisWithClosestLandsat,date_str,selected_lst_type,select
     bands_ResNet=['DOY','Elevation', 'SR_B4','sur_refl_b07','NDWI', 'NDVI','NDBI','LST_Day_1km']
 
     data = modisWithClosestLandsat.first().wx.to_xarray(scale=100, crs='EPSG:4326')
+    data=data.isel(time=0)
     nan_mask_modis = np.isnan(data['LST_Day_1km'])
     nan_mask_Landsat = np.isnan(data['NDVI'])
     data = data.where(~nan_mask_modis, np.nan)
