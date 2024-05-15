@@ -251,6 +251,65 @@ def Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_
     st.markdown(get_png_download_link(fig, file_name=selected_lst_type+'_Downscaled_LST_Map_'+date_str+'.png'), unsafe_allow_html=True)
     pass
 
+
+def Predictions_ResNet(modisWithClosestLandsat,date_str,selected_lst_type,selected_model):
+    bands_ResNet=['DOY','Elevation', 'SR_B4','sur_refl_b07','NDWI', 'NDVI','NDBI','LST_Day_1km']
+
+    data = modisWithClosestLandsat.first().wx.to_xarray(scale=100, crs='EPSG:4326')
+    nan_mask_modis = np.isnan(data['LST_Day_1km'])
+    nan_mask_Landsat = np.isnan(data['NDVI'])
+    data = data.where(~nan_mask_modis, np.nan)
+    data = data.where(~nan_mask_Landsat, np.nan)
+    data1 = data.fillna(data.mean())
+    X_patches = np.stack([data1[var].values for var in bands_ResNet], axis=-1)
+    num_rows=X_patches.shape[0]
+    num_Columns=X_patches.shape[1]
+    
+    load_model_and_scaler_ResNet(selected_model,num_rows, num_Columns, 8)
+    X_all_normalized = X_patches.reshape(-1, X_patches.shape[-1])
+    X_all_normalized = scaler_X.transform(X_all_normalized)
+    X_all_normalized = X_all_normalized.reshape(X_patches.shape)
+    X_expanded = np.expand_dims(X_all_normalized, axis=0)
+    y_pred = best_model.predict(X_expanded)
+
+    y_pred_0 = scaler_y.inverse_transform(y_pred.reshape(-1, 1))
+    y_pred_1 = y_pred_0.reshape(num_rows,num_Columns)
+    
+    data['ResNet_LST']=(['y','x'],y_pred_1)
+    data['ResNet_LST'].attrs = {'long_name': 'ResNet_LST', 'AREA_OR_POINT': 'Area', 'grid_mapping': 'spatial_ref'}
+    nan_mask = np.isnan(data['LST_Day_1km'])
+    data = data.where(~nan_mask, np.nan)
+    data['MODIS_LST'].attrs = {'long_name': 'MODIS LST (K)', 'AREA_OR_POINT': 'Area', 'grid_mapping': 'spatial_ref'}
+    
+    # Plot multiple images in subplots
+    min_ = np.nanpercentile(y_pred_0, 1)
+    max_ = np.nanpercentile(y_pred_0, 99)
+    
+    fig, (ax1, ax2,cax) = plt.subplots(ncols=3 ,figsize=(8, 3.5),gridspec_kw={"width_ratios":[1,1,0.05]})
+    # fig.subplots_adjust(wspace=0.1)
+    im1 = data['MODIS_LST'].plot(ax=ax1, cmap='jet', vmin=min_, vmax=max_,add_colorbar=False)
+    im2 = data['ResNet_LST'].plot(ax=ax2, cmap='jet', vmin=min_, vmax=max_,add_colorbar=False)
+    
+    ax1.set_title('MODIS LST')
+    ax2.set_title('ResNet LST')
+    ip = InsetPosition(ax2, [1.05,0,0.05,1]) 
+    cax.set_axes_locator(ip)
+    cbar=fig.colorbar(im2, cax=cax, ax=[ax1,ax2])
+    cbar.set_label('LST in Kelvin', size=12)
+
+    for ax in (ax1, ax2):
+        # ax.set_xticks([])
+        # ax.set_yticks([])
+        ax.set_xlabel('')
+        ax.set_ylabel('')
+        plt.tight_layout()
+    
+    # Convert the plot to an image for displaying in Streamlit
+    st.pyplot(fig)
+    st.markdown(get_nc_download_link(data[['MODIS_LST','ResNet_LST']],file_name=selected_lst_type+'_Downscaled_LST_'+date_str+'.nc'), unsafe_allow_html=True)
+    st.markdown(get_png_download_link(fig, file_name=selected_lst_type+'_Downscaled_LST_Map_'+date_str+'.png'), unsafe_allow_html=True)
+    pass
+
 def user_input_map(lat, lon, buffer_size, date):
     try:
         date_str = date.strftime('%Y-%m-%d')
@@ -308,8 +367,8 @@ def main():
             Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_model)
             
         if selected_model in ['ResNet_SMWA', 'ResNet_L2']:
-            load_model_and_scaler_ResNet(selected_model,num_rows, num_Columns, n_bands)
-            Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_model)
+            Predictions_ResNet(modisWithClosestLandsat,date_str,selected_lst_type,selected_model)
+            
         st.sidebar.success("Code execution completed successfully!")
 
 if __name__ == "__main__":
