@@ -210,7 +210,7 @@ def Predictions(modisWithClosestLandsat,date_str,selected_lst_type):
     # Convert the plot to an image for displaying in Streamlit
     st.pyplot(fig)
     st.markdown(get_nc_download_link(data[['LST_Day_1km','ANN_LST']],file_name=selected_lst_type+'_Downscaled_LST_'+date_str+'.nc'), unsafe_allow_html=True)
-    st.markdown(get_png_download_link(fig, file_name=selected_lst_type+'_Downscaled_LST_Map_'+date_str+.png'):
+    st.markdown(get_png_download_link(fig, file_name=selected_lst_type+'_Downscaled_LST_Map_'+date_str+.png', unsafe_allow_html=True)
     pass
 
 def user_input_map(lat, lon, buffer_size, date):
