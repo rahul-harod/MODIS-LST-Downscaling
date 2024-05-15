@@ -250,8 +250,8 @@ def Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_
     
     # Convert the plot to an image for displaying in Streamlit
     st.pyplot(fig)
-    st.markdown(get_nc_download_link(data[['MODIS_LST','ANN_LST']],file_name=selected_lst_type+'_Downscaled_LST_'+date_str+'.nc'), unsafe_allow_html=True)
-    st.markdown(get_png_download_link(fig, file_name=selected_lst_type+'_Downscaled_LST_Map_'+date_str+'.png'), unsafe_allow_html=True)
+    st.markdown(get_nc_download_link(data[['MODIS_LST','ANN_LST']],file_name=selected_lst_type+'_Downscaled_LST_'+date_str+'_'+selected_model+'.nc'), unsafe_allow_html=True)
+    st.markdown(get_png_download_link(fig, file_name=selected_lst_type+'_Downscaled_LST_Map_'+date_str+'_'+selected_model+'.png'), unsafe_allow_html=True)
     pass
 
 
@@ -310,8 +310,8 @@ def Predictions_ResNet(modisWithClosestLandsat,date_str,selected_lst_type,select
     
     # Convert the plot to an image for displaying in Streamlit
     st.pyplot(fig)
-    st.markdown(get_nc_download_link(data[['MODIS_LST','ResNet_LST']],file_name=selected_lst_type+'_Downscaled_LST_'+date_str+'.nc'), unsafe_allow_html=True)
-    st.markdown(get_png_download_link(fig, file_name=selected_lst_type+'_Downscaled_LST_Map_'+date_str+'.png'), unsafe_allow_html=True)
+    st.markdown(get_nc_download_link(data[['MODIS_LST','ResNet_LST']],file_name=selected_lst_type+'_Downscaled_LST_'+date_str+'_'+selected_model+'.nc'), unsafe_allow_html=True)
+    st.markdown(get_png_download_link(fig, file_name=selected_lst_type+'_Downscaled_LST_Map_'+date_str+'_'+selected_model+'.png'), unsafe_allow_html=True)
     pass
 
 def user_input_map(lat, lon, buffer_size, date):
@@ -361,8 +361,7 @@ def main():
     MODIS_Ref_500 = ee.ImageCollection(lst_paths[selected_lst_type]['MODIS_Ref_500'])
     ERA_hour=lst_paths[selected_lst_type]['ERA_hour']
     LST_band=lst_paths[selected_lst_type]['LST_band']
-    st.write("Path",lst_paths[selected_lst_type]['Modis'])
-    st.write("LST_band",lst_paths[selected_lst_type]['LST_band'])
+    st.write(selected_lst_type+': '+selected_model)
     # Run the code when the user clicks the button
     if st.sidebar.button("Submit"):
         clip_roi,date_str=user_input_map(lat, lon, radius, date_input)
