@@ -60,6 +60,7 @@ def conv_block(input_tensor, kernel_size, filters, stage, block, strides=(1, 1),
     x = Activation('relu')(x)
     return x
 
+
 def ResNet50(num_rows, num_Columns, bands):
     """Instantiates the ResNet50 architecture."""
     bn_axis = -1
@@ -98,3 +99,4 @@ def ResNet50(num_rows, num_Columns, bands):
     
     model = Model(inputs=input_tensor, outputs=x, name='resnet50')
     return model
+
