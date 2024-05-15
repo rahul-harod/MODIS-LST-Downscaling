@@ -13,6 +13,7 @@ from tensorflow.keras.models import model_from_json
 import streamlit as st
 from google.oauth2 import service_account
 from ee import oauth
+import resnet
 
 "# MODIS LST Downscaling"
 def get_auth():
@@ -78,7 +79,7 @@ scaler_X = None
 scaler_y = None
 best_model = None
 
-def load_model_and_scaler(model_name):
+def load_model_and_scaler_ANN(model_name):
     global scaler_X, scaler_y, best_model
     
     model_dir = f"Models/{model_name}/"
@@ -90,6 +91,15 @@ def load_model_and_scaler(model_name):
 
     best_model = model_from_json(loaded_model_json)
     best_model.load_weights(model_dir + "ANN_72_Model_Weights.h5")
+
+def load_model_and_scaler_ResNet(model_name,num_rows, num_Columns, n_bands)):
+    scaler=joblib.load(model_dir + "ResNet_734_StandardScaler.pkl")
+    scaler_X = scaler['scaler_X']
+    scaler_y = scaler['scaler_y']
+
+    best_model = resnet.ResNet50(num_rows, num_Columns, n_bands)
+    best_model.load_weights(model_dir + "ResNet_734_Weights.h5")
+        
 
 
 # scaler_X = joblib.load(r"ANN_72_scaler_X.pkl")
@@ -288,9 +298,9 @@ def main():
     lst_types = ['Aqua_daytime', 'Aqua_nighttime', 'Terra_daytime', 'Terra_nighttime']
     selected_lst_type = st.sidebar.selectbox("Select LST Type", lst_types, index=lst_types.index(selected_lst_type))
 
-    Model_types = ['ANN_L2', 'ANN_SMWA']
+    Model_types = ['ANN_L2', 'ANN_SMWA',ResNet_SMWA]
     selected_model = st.sidebar.selectbox("Select Model", Model_types, index=Model_types.index(selected_model))
-    load_model_and_scaler(selected_model)
+    load_model_and_scaler_ANN(selected_model)
 
     # Update variables based on the selected LST type
     Modis = ee.ImageCollection(lst_paths[selected_lst_type]['Modis'])
