@@ -150,7 +150,7 @@ def downscale(date, clip_roi, Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5,ERA_hour
     MODIS_Ref_500 = MODIS_Ref_500.filterDate(start, end).select(['sur_refl_b03', 'sur_refl_b04', 'sur_refl_b05', 'sur_refl_b06', 'sur_refl_b07'])
     Modis = Modis.combine(MODIS_Ref_250).combine(MODIS_Ref_500)
 
-    Modis = Modis.map(lambda img: addBandsToModis(img,LST_band).map(lambda img: downsampledMODIS_LST(img, clip_roi)).select(['sur_refl_b03', 'sur_refl_b04', 'sur_refl_b05', 'sur_refl_b06', 'sur_refl_b07', 'LST_Day_1km','Original_MOD_LST'])
+    Modis = Modis.map(lambda img: addBandsToModis(img,LST_band)).map(lambda img: downsampledMODIS_LST(img, clip_roi)).select(['sur_refl_b03', 'sur_refl_b04', 'sur_refl_b05', 'sur_refl_b06', 'sur_refl_b07', 'LST_Day_1km','Original_MOD_LST'])
     ERA5 = ERA5.filterDate(start, end).select('surface_solar_radiation_downwards_hourly').filter(ee.Filter.eq('hour', ERA_hour)).map(lambda img: downsampledLST(img, clip_roi)).map(lambda image: image.set('system:time_start', ee.Date(image.get('system:time_start')).update(hour=0, minute=0, second=0).millis()))
     filterJoin = ee.Filter.equals(leftField='system:time_start', rightField='system:time_start')
     simpleJoin = ee.Join.inner()
