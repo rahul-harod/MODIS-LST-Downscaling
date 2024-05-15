@@ -150,13 +150,17 @@ def Predictions(modisWithClosestLandsat,date_str):
     min_ = np.nanpercentile(df1['ANN_LST'], 1)
     max_ = np.nanpercentile(df1['ANN_LST'], 99)
     
-    fig, (ax1, ax2) = plt.subplots(1,2, figsize=(7, 3))
-    fig.subplots_adjust(wspace=0.4)
+    fig, (ax1, ax2,cax) = plt.subplots(ncols=3 figsize=(7, 3.3),gridspec_kw={"width_ratios":[1,1 ,0.05]}))
+    fig.subplots_adjust(wspace=0.1)
     im1 = data['LST_Day_1km'].plot(ax=ax1, cmap='jet', vmin=min_, vmax=max_,add_colorbar=False)
-    im2 = data['ANN_LST'].plot(ax=ax2, cmap='jet', vmin=min_, vmax=max_)
+    im2 = data['ANN_LST'].plot(ax=ax2, cmap='jet', vmin=min_, vmax=max_,add_colorbar=False)
     
     ax1.set_title('MODIS LST')
     ax2.set_title('ANN LST')
+    ip = InsetPosition(ax2, [1.05,0,0.05,1]) 
+    cax.set_axes_locator(ip)
+    cbar=f.colorbar(im2, cax=cax, ax=[ax1,ax2])
+    cbar.set_label('LST in Kelvin', size=12)
 
     for ax in (ax1, ax2):
         # ax.set_xticks([])
