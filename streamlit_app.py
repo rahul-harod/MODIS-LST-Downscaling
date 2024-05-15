@@ -76,12 +76,13 @@ MODIS_Ref_500 = ee.ImageCollection(lst_paths[selected_lst_type]['MODIS_Ref_500']
 L89_Bands = ['SR_B2', 'SR_B3', 'SR_B4', 'SR_B5', 'SR_B6', 'SR_B7', 'ST_B10', 'QA_PIXEL']
 
 
-global scaler_X, scaler_y, best_model
+
 scaler_X = None
 scaler_y = None
 best_model = None
 
 def load_model_and_scaler_ANN(model_name):
+    global scaler_X, scaler_y, best_model
     model_dir = f"Models/{model_name}/"
     scaler_X = joblib.load(model_dir + "ANN_72_scaler_X.pkl")
     scaler_y = joblib.load(model_dir + "ANN_72_scaler_y.pkl")
@@ -93,6 +94,7 @@ def load_model_and_scaler_ANN(model_name):
     best_model.load_weights(model_dir + "ANN_72_Model_Weights.h5")
 
 def load_model_and_scaler_ResNet(model_name,num_rows, num_Columns, n_bands):
+    global scaler_X, scaler_y, best_model
     model_dir = f"Models/{model_name}/"
     scaler=joblib.load(model_dir + "ResNet_734_StandardScaler.pkl")
     scaler_X = scaler['scaler_X']
