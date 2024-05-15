@@ -200,16 +200,17 @@ def get_png_download_link(f, file_name='Downscaled_LST_Map.png'):
 
     
 def Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_model):
+    bands_ANN=['DOY','Elevation', 'SR_B4','sur_refl_b07', 'SSRDH', 'NDVI','NDBI','LST_Day_1km']
+
     data = modisWithClosestLandsat.first().wx.to_xarray(scale=100, crs='EPSG:4326')
     df = data.to_dataframe()
     df.reset_index(inplace=True)
     df.drop(columns=['spatial_ref'], inplace=True)
     df.rename(columns={'surface_solar_radiation_downwards_hourly': 'SSRDH'}, inplace=True)
-    df1 = df[bands]
+    df1 = df[bands_ANN]
     df1.dropna(inplace=True)
     
     load_model_and_scaler_ANN(selected_model)
-    bands_ANN=['DOY','Elevation', 'SR_B4','sur_refl_b07', 'SSRDH', 'NDVI','NDBI','LST_Day_1km']
     X_test = scaler_X.transform(df1[bands_ANN])
     y_pred = best_model.predict(X_test)
     df1['ANN_LST'] = scaler_y.inverse_transform(y_pred)
