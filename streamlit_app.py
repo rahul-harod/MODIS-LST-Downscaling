@@ -158,9 +158,18 @@ def get_nc_download_link(ds, file_name='Downscaled_LST.nc'):
     return href
 
 def get_png_download_link(f, file_name='Downscaled_LST_Map.png'):
-    f1=f.savefig(file_name,dpi=600)  # Save the plot as PNG
-    f_b64 = base64.b64encode(f1).decode()  # Encode bytes to base64
-    href = f'<a href="data:file/nc;base64,{f_b64}" download="{file_name}">Download PNG file</a>'
+    # Save the plot as PNG
+    f.savefig(file_name, dpi=600)
+    
+    # Read the saved PNG file
+    with open(file_name, 'rb') as f_png:
+        png_bytes = f_png.read()
+
+    # Encode PNG bytes to base64
+    png_b64 = base64.b64encode(png_bytes).decode()
+    
+    # Generate the download link
+    href = f'<a href="data:file/png;base64,{png_b64}" download="{file_name}">Download PNG file</a>'
     return href
 
     
