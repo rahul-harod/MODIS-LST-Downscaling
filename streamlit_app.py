@@ -34,27 +34,32 @@ lst_paths = {
     'Aqua_daytime': {
         'Modis': "MODIS/061/MYD11A1",
         'MODIS_Ref_250': "MODIS/061/MYD09GQ",
-        'MODIS_Ref_500': "MODIS/061/MYD09GA"
+        'MODIS_Ref_500': "MODIS/061/MYD09GA",
+        'ERA_hour':8,
     },
     'Aqua_nighttime': {
         'Modis': "MODIS/061/MYD11A1",
         'MODIS_Ref_250': "MODIS/061/MYD09GQ",
-        'MODIS_Ref_500': "MODIS/061/MYD09GA"
+        'MODIS_Ref_500': "MODIS/061/MYD09GA",
+        'ERA_hour':20,
     },
     'Terra_daytime': {
         'Modis': "MODIS/061/MOD11A1",
         'MODIS_Ref_250': "MODIS/061/MOD09GQ",
-        'MODIS_Ref_500': "MODIS/061/MOD09GA"
+        'MODIS_Ref_500': "MODIS/061/MOD09GA",
+        'ERA_hour':5,
     },
     'Terra_nighttime': {
         'Modis': "MODIS/061/MOD11A1",
         'MODIS_Ref_250': "MODIS/061/MOD09GQ",
-        'MODIS_Ref_500': "MODIS/061/MOD09GA"
+        'MODIS_Ref_500': "MODIS/061/MOD09GA",
+        'ERA_hour':17,
     }
 }
 
 # Initialize variables with default paths
 selected_lst_type = 'Aqua_daytime'
+ERA_hour=8
 Modis = ee.ImageCollection(lst_paths[selected_lst_type]['Modis'])
 MODIS_Ref_250 = ee.ImageCollection(lst_paths[selected_lst_type]['MODIS_Ref_250'])
 MODIS_Ref_500 = ee.ImageCollection(lst_paths[selected_lst_type]['MODIS_Ref_500'])
@@ -118,7 +123,7 @@ def findClosestLandsat(modisImage,landsat):
     closestLandsatImage = ee.Image(sortedLandsat.first())
     return modisImage.addBands(closestLandsatImage).set('MODIS_Time', modisDate.format('YYYY-MM-dd HH:mm')).set('DATE_ACQUIRED', modisDate.format('YYYY-MM-dd')).set('Landsat_Time', closestLandsatImage.get('Landsat_Time'))
 
-def downscale(date, clip_roi, Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5):
+def downscale(date, clip_roi, Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5,ERA_hour):
     st.write('Date',date)
     elevation = DEM.clip(clip_roi)
     elevation = LandsatUpscale(elevation).rename('Elevation')
@@ -137,7 +142,7 @@ def downscale(date, clip_roi, Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5):
     Modis = Modis.combine(MODIS_Ref_250).combine(MODIS_Ref_500)
 
     Modis = Modis.map(addBandsToModis).map(lambda img: downsampledLST(img, clip_roi)).select(['sur_refl_b03', 'sur_refl_b04', 'sur_refl_b05', 'sur_refl_b06', 'sur_refl_b07', 'LST_Day_1km'])
-    ERA5 = ERA5.filterDate(start, end).select('surface_solar_radiation_downwards_hourly').filter(ee.Filter.eq('hour', 8)).map(lambda img: downsampledLST(img, clip_roi)).map(lambda image: image.set('system:time_start', ee.Date(image.get('system:time_start')).update(hour=0, minute=0, second=0).millis()))
+    ERA5 = ERA5.filterDate(start, end).select('surface_solar_radiation_downwards_hourly').filter(ee.Filter.eq('hour', ERA_hour)).map(lambda img: downsampledLST(img, clip_roi)).map(lambda image: image.set('system:time_start', ee.Date(image.get('system:time_start')).update(hour=0, minute=0, second=0).millis()))
     filterJoin = ee.Filter.equals(leftField='system:time_start', rightField='system:time_start')
     simpleJoin = ee.Join.inner()
     modis_ERA = ee.ImageCollection(simpleJoin.apply(Modis, ERA5, filterJoin))
@@ -152,8 +157,14 @@ def get_nc_download_link(ds, file_name='Downscaled_LST.nc'):
     href = f'<a href="data:file/nc;base64,{nc_b64}" download="{file_name}">Download NetCDF file</a>'
     return href
 
+def get_png_download_link(f, file_name='Downscaled_LST_Map.png'):
+    f1=f.savefig(file_name,dpi=600)  # Save the plot as PNG
+    f_b64 = base64.b64encode(f1).decode()  # Encode bytes to base64
+    href = f'<a href="data:file/nc;base64,{f_b64}" download="{file_name}">Download PNG file</a>'
+    return href
+
     
-def Predictions(modisWithClosestLandsat,date_str):
+def Predictions(modisWithClosestLandsat,date_str,selected_lst_type):
     data = modisWithClosestLandsat.first().wx.to_xarray(scale=100, crs='EPSG:4326')
     df = data.to_dataframe()
     df.reset_index(inplace=True)
@@ -198,7 +209,8 @@ def Predictions(modisWithClosestLandsat,date_str):
     
     # Convert the plot to an image for displaying in Streamlit
     st.pyplot(fig)
-    st.markdown(get_nc_download_link(data[['LST_Day_1km','ANN_LST']],file_name='Aqua_Day_Downscaled_LST_'+date_str+'.nc'), unsafe_allow_html=True)
+    st.markdown(get_nc_download_link(data[['LST_Day_1km','ANN_LST']],file_name=selected_lst_type+'_Downscaled_LST_'+date_str+'.nc'), unsafe_allow_html=True)
+    st.markdown(get_png_download_link(fig, file_name=selected_lst_type+'_Downscaled_LST_Map_'+date_str+.png'):
     pass
 
 def user_input_map(lat, lon, buffer_size, date):
@@ -226,7 +238,7 @@ def user_input_map(lat, lon, buffer_size, date):
 
 
 def main():
-    global selected_lst_type, Modis, MODIS_Ref_250, MODIS_Ref_500
+    global selected_lst_type, Modis, MODIS_Ref_250, MODIS_Ref_500,ERA_hour
     
     # Inputs in the sidebar
     st.sidebar.title("Enter Search Criteria")
@@ -242,12 +254,14 @@ def main():
     Modis = ee.ImageCollection(lst_paths[selected_lst_type]['Modis'])
     MODIS_Ref_250 = ee.ImageCollection(lst_paths[selected_lst_type]['MODIS_Ref_250'])
     MODIS_Ref_500 = ee.ImageCollection(lst_paths[selected_lst_type]['MODIS_Ref_500'])
+    ERA_hour=lst_paths[selected_lst_type]['ERA_hour']
+    
     # st.write("Path",lst_paths[selected_lst_type]['Modis'])
     # Run the code when the user clicks the button
     if st.sidebar.button("Submit"):
         clip_roi,date_str=user_input_map(lat, lon, radius, date_input)
-        modisWithClosestLandsat = downscale(date_str, clip_roi, Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5)
-        Predictions(modisWithClosestLandsat,date_str)
+        modisWithClosestLandsat = downscale(date_str, clip_roi, Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5,ERA_hour)
+        Predictions(modisWithClosestLandsat,date_str,selected_lst_type)
         st.sidebar.success("Code execution completed successfully!")
 
 if __name__ == "__main__":
