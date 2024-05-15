@@ -113,7 +113,7 @@ def calculateTimeDifference(modisImage, landsatImage):
 
 def findClosestLandsat(modisImage,landsat):
     modisDate = ee.Date(modisImage.date())
-    landsatImagesInRange = landsat.filterDate(modisDate.advance(-60, 'day'), modisDate.advance(60, 'day'))
+    landsatImagesInRange = landsat.filterDate(modisDate.advance(-17, 'day'), modisDate.advance(17, 'day'))
     sortedLandsat = landsatImagesInRange.map(lambda landsatImage: landsatImage.set('time_difference', calculateTimeDifference(modisImage, landsatImage))).sort('time_difference')
     closestLandsatImage = ee.Image(sortedLandsat.first())
     return modisImage.addBands(closestLandsatImage).set('MODIS_Time', modisDate.format('YYYY-MM-dd HH:mm')).set('DATE_ACQUIRED', modisDate.format('YYYY-MM-dd')).set('Landsat_Time', closestLandsatImage.get('Landsat_Time'))
@@ -127,9 +127,9 @@ def downscale(date, clip_roi, Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5):
     DOY_image = LandsatUpscale(DOY_image)
     
     start = ee.Date(date)
-    end = start.advance(10,'day')
+    end = start.advance(1,'day')
 
-    Landsat_Coll = L8.merge(L9).sort('system:time_start').filterDate(start, end).filterBounds(clip_roi)
+    Landsat_Coll = L8.merge(L9).sort('system:time_start').filterDate(start.advance(-32,'days'), end.advance(32,'days')).filterBounds(clip_roi)
     landsat = Landsat_Coll.map(cloudMask).map(LandsatUpscale).map(applyScaleFactors).map(NDVI_NDBI_NDWI)
     Modis = Modis.filterDate(start, end)
     MODIS_Ref_250 = MODIS_Ref_250.filterDate(start, end).select(['sur_refl_b01', 'sur_refl_b02'])
@@ -242,7 +242,7 @@ def main():
     Modis = ee.ImageCollection(lst_paths[selected_lst_type]['Modis'])
     MODIS_Ref_250 = ee.ImageCollection(lst_paths[selected_lst_type]['MODIS_Ref_250'])
     MODIS_Ref_500 = ee.ImageCollection(lst_paths[selected_lst_type]['MODIS_Ref_500'])
-    st.write("Path",lst_paths[selected_lst_type]['Modis'])
+    # st.write("Path",lst_paths[selected_lst_type]['Modis'])
     # Run the code when the user clicks the button
     if st.sidebar.button("Submit"):
         clip_roi,date_str=user_input_map(lat, lon, radius, date_input)
