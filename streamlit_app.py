@@ -152,7 +152,7 @@ def Predictions(modisWithClosestLandsat,date_str):
     
     fig, (ax1, ax2) = plt.subplots(1,2, figsize=(7, 3))
     fig.subplots_adjust(wspace=0.2)
-    im1 = data['LST_Day_1km'].plot(ax=ax1, cmap='jet', vmin=min_, vmax=max_)
+    im1 = data['LST_Day_1km'].plot(ax=ax1, cmap='jet', vmin=min_, vmax=max_,add_colorbar=False)
     im2 = data['ANN_LST'].plot(ax=ax2, cmap='jet', vmin=min_, vmax=max_)
     
     ax1.set_title('MODIS LST')
