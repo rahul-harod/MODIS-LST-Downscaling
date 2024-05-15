@@ -275,7 +275,7 @@ def user_input_map(lat, lon, buffer_size, date):
 
 
 def main():
-    global selected_lst_type, Modis, MODIS_Ref_250, MODIS_Ref_500,ERA_hour,LST_band
+    global selected_lst_type, Modis, MODIS_Ref_250, MODIS_Ref_500,ERA_hour,LST_band,selected_model
     
     # Inputs in the sidebar
     st.sidebar.title("Enter Search Criteria")
