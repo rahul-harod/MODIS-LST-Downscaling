@@ -36,30 +36,35 @@ lst_paths = {
         'MODIS_Ref_250': "MODIS/061/MYD09GQ",
         'MODIS_Ref_500': "MODIS/061/MYD09GA",
         'ERA_hour':8,
+        'LST_band':'LST_Day_1km',
     },
     'Aqua_nighttime': {
         'Modis': "MODIS/061/MYD11A1",
         'MODIS_Ref_250': "MODIS/061/MYD09GQ",
         'MODIS_Ref_500': "MODIS/061/MYD09GA",
         'ERA_hour':20,
+        'LST_band':'LST_Night_1km'
     },
     'Terra_daytime': {
         'Modis': "MODIS/061/MOD11A1",
         'MODIS_Ref_250': "MODIS/061/MOD09GQ",
         'MODIS_Ref_500': "MODIS/061/MOD09GA",
         'ERA_hour':5,
+        'LST_band':'LST_Day_1km',
     },
     'Terra_nighttime': {
         'Modis': "MODIS/061/MOD11A1",
         'MODIS_Ref_250': "MODIS/061/MOD09GQ",
         'MODIS_Ref_500': "MODIS/061/MOD09GA",
         'ERA_hour':17,
+        'LST_band':'LST_Night_1km'
     }
 }
 
 # Initialize variables with default paths
 selected_lst_type = 'Aqua_daytime'
 ERA_hour=8
+LST_band='LST_Day_1km'
 Modis = ee.ImageCollection(lst_paths[selected_lst_type]['Modis'])
 MODIS_Ref_250 = ee.ImageCollection(lst_paths[selected_lst_type]['MODIS_Ref_250'])
 MODIS_Ref_500 = ee.ImageCollection(lst_paths[selected_lst_type]['MODIS_Ref_500'])
@@ -83,9 +88,13 @@ bands=['DOY','Elevation', 'SR_B4','sur_refl_b07', 'SSRDH', 'NDVI','NDBI','LST_Da
 def LandsatUpscale(img):
     return img.reduceResolution(reducer=ee.Reducer.mean(), maxPixels=1024).reproject(crs=targetProjection, scale=100)
 
-def downsampledLST(img, clip_roi):
-    return img.resample('bilinear').reproject(crs=targetProjection, scale=100).clip(clip_roi)
-
+def downsampledLST(img):
+    return img.resample('bilinear').reproject(crs=targetProjection, scale=100)
+    
+def downsampledMODIS_LST(img):
+    original_lst=img.select('LST_Day_1km').rename('Original_MOD_LST')
+    return img.resample('bilinear').reproject(crs=targetProjection, scale=100).addBands(original_lst)
+    
 def NDVI_NDBI_NDWI(img):
     ndvi = img.normalizedDifference(['SR_B5', 'SR_B4']).rename('NDVI')
     ndbi = img.normalizedDifference(['SR_B6', 'SR_B5']).rename('NDBI')
@@ -106,8 +115,8 @@ def applyScaleFactors(image):
     thermalBands = image.select('ST_B.*').multiply(0.00341802).add(149.0)
     return image.addBands(opticalBands, None, True).addBands(thermalBands, None, True).select(['SR_B3', 'SR_B4', 'SR_B5', 'SR_B6', 'SR_B7', 'ST_B10']).set('Landsat_Time', ee.Date(image.get('system:time_start')).format('YYYY-MM-dd HH:mm'))
 
-def addBandsToModis(img):
-    thermalBands = img.select('LST_Day_1km').multiply(0.02)
+def addBandsToModis(img,LST_band):
+    thermalBands = img.select(LST_band).multiply(0.02).rename('LST_Day_1km')
     opticalBands = img.select('sur_refl_b.*').multiply(0.0001)
     return img.addBands([thermalBands, opticalBands], None, True)
 
@@ -123,7 +132,7 @@ def findClosestLandsat(modisImage,landsat):
     closestLandsatImage = ee.Image(sortedLandsat.first())
     return modisImage.addBands(closestLandsatImage).set('MODIS_Time', modisDate.format('YYYY-MM-dd HH:mm')).set('DATE_ACQUIRED', modisDate.format('YYYY-MM-dd')).set('Landsat_Time', closestLandsatImage.get('Landsat_Time'))
 
-def downscale(date, clip_roi, Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5,ERA_hour):
+def downscale(date, clip_roi, Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5,ERA_hour,LST_band):
     st.write('Date',date)
     elevation = DEM.clip(clip_roi)
     elevation = LandsatUpscale(elevation).rename('Elevation')
@@ -141,7 +150,7 @@ def downscale(date, clip_roi, Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5,ERA_hour
     MODIS_Ref_500 = MODIS_Ref_500.filterDate(start, end).select(['sur_refl_b03', 'sur_refl_b04', 'sur_refl_b05', 'sur_refl_b06', 'sur_refl_b07'])
     Modis = Modis.combine(MODIS_Ref_250).combine(MODIS_Ref_500)
 
-    Modis = Modis.map(addBandsToModis).map(lambda img: downsampledLST(img, clip_roi)).select(['sur_refl_b03', 'sur_refl_b04', 'sur_refl_b05', 'sur_refl_b06', 'sur_refl_b07', 'LST_Day_1km'])
+    Modis = Modis.map(lambda img: addBandsToModis(img,LST_band).map(lambda img: downsampledMODIS_LST(img, clip_roi)).select(['sur_refl_b03', 'sur_refl_b04', 'sur_refl_b05', 'sur_refl_b06', 'sur_refl_b07', 'LST_Day_1km','Original_MOD_LST'])
     ERA5 = ERA5.filterDate(start, end).select('surface_solar_radiation_downwards_hourly').filter(ee.Filter.eq('hour', ERA_hour)).map(lambda img: downsampledLST(img, clip_roi)).map(lambda image: image.set('system:time_start', ee.Date(image.get('system:time_start')).update(hour=0, minute=0, second=0).millis()))
     filterJoin = ee.Filter.equals(leftField='system:time_start', rightField='system:time_start')
     simpleJoin = ee.Join.inner()
@@ -191,7 +200,7 @@ def Predictions(modisWithClosestLandsat,date_str,selected_lst_type):
     merged_df = merged_df.to_xarray()
     data['ANN_LST'] = merged_df['ANN_LST']
     data['ANN_LST'].attrs = {'long_name': 'LST (K)', 'AREA_OR_POINT': 'Area', 'grid_mapping': 'spatial_ref'}
-    data['LST_Day_1km'].attrs = {'long_name': 'LST (K)', 'AREA_OR_POINT': 'Area', 'grid_mapping': 'spatial_ref'}
+    data['Original_MOD_LST'].attrs = {'long_name': 'LST (K)', 'AREA_OR_POINT': 'Area', 'grid_mapping': 'spatial_ref'}
     
     # Plot multiple images in subplots
     min_ = np.nanpercentile(df1['ANN_LST'], 1)
@@ -199,7 +208,7 @@ def Predictions(modisWithClosestLandsat,date_str,selected_lst_type):
     
     fig, (ax1, ax2,cax) = plt.subplots(ncols=3 ,figsize=(8, 3.5),gridspec_kw={"width_ratios":[1,1,0.05]})
     # fig.subplots_adjust(wspace=0.1)
-    im1 = data['LST_Day_1km'].plot(ax=ax1, cmap='jet', vmin=min_, vmax=max_,add_colorbar=False)
+    im1 = data['Original_MOD_LST'].plot(ax=ax1, cmap='jet', vmin=min_, vmax=max_,add_colorbar=False)
     im2 = data['ANN_LST'].plot(ax=ax2, cmap='jet', vmin=min_, vmax=max_,add_colorbar=False)
     
     ax1.set_title('MODIS LST')
@@ -247,7 +256,7 @@ def user_input_map(lat, lon, buffer_size, date):
 
 
 def main():
-    global selected_lst_type, Modis, MODIS_Ref_250, MODIS_Ref_500,ERA_hour
+    global selected_lst_type, Modis, MODIS_Ref_250, MODIS_Ref_500,ERA_hour,LST_band
     
     # Inputs in the sidebar
     st.sidebar.title("Enter Search Criteria")
@@ -264,12 +273,12 @@ def main():
     MODIS_Ref_250 = ee.ImageCollection(lst_paths[selected_lst_type]['MODIS_Ref_250'])
     MODIS_Ref_500 = ee.ImageCollection(lst_paths[selected_lst_type]['MODIS_Ref_500'])
     ERA_hour=lst_paths[selected_lst_type]['ERA_hour']
-    
+    LST_band=lst_paths[selected_lst_type]['LST_band']
     # st.write("Path",lst_paths[selected_lst_type]['Modis'])
     # Run the code when the user clicks the button
     if st.sidebar.button("Submit"):
         clip_roi,date_str=user_input_map(lat, lon, radius, date_input)
-        modisWithClosestLandsat = downscale(date_str, clip_roi, Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5,ERA_hour)
+        modisWithClosestLandsat = downscale(date_str, clip_roi, Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5,ERA_hour,LST_band)
         Predictions(modisWithClosestLandsat,date_str,selected_lst_type)
         st.sidebar.success("Code execution completed successfully!")
 
