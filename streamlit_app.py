@@ -27,11 +27,38 @@ get_auth()
 targetProjection = ee.Projection('EPSG:32643')
 ERA5 = ee.ImageCollection("ECMWF/ERA5_LAND/HOURLY")
 DEM = ee.Image("USGS/SRTMGL1_003")
-Modis = ee.ImageCollection("MODIS/061/MYD11A1")
-MODIS_Ref_250 = ee.ImageCollection("MODIS/061/MYD09GQ")
-MODIS_Ref_500 = ee.ImageCollection("MODIS/061/MYD09GA")
 L8 = ee.ImageCollection("LANDSAT/LC08/C02/T1_L2")
 L9 = ee.ImageCollection("LANDSAT/LC09/C02/T1_L2")
+
+lst_paths = {
+    'Aqua_daytime': {
+        'Modis': "MODIS/061/MYD11A1",
+        'MODIS_Ref_250': "MODIS/061/MYD09GQ",
+        'MODIS_Ref_500': "MODIS/061/MYD09GA"
+    },
+    'Aqua_nighttime': {
+        'Modis': "MODIS/061/MYD11A1",
+        'MODIS_Ref_250': "MODIS/061/MYD09GQ",
+        'MODIS_Ref_500': "MODIS/061/MYD09GA"
+    },
+    'Terra_daytime': {
+        'Modis': "MODIS/061/MOD11A1",
+        'MODIS_Ref_250': "MODIS/061/MOD09GQ",
+        'MODIS_Ref_500': "MODIS/061/MOD09GA"
+    },
+    'Terra_nighttime': {
+        'Modis': "MODIS/061/MOD11A1",
+        'MODIS_Ref_250': "MODIS/061/MOD09GQ",
+        'MODIS_Ref_500': "MODIS/061/MOD09GA"
+    }
+}
+
+# Initialize variables with default paths
+selected_lst_type = 'Aqua_daytime'
+Modis = ee.ImageCollection(lst_paths[selected_lst_type]['Modis'])
+MODIS_Ref_250 = ee.ImageCollection(lst_paths[selected_lst_type]['MODIS_Ref_250'])
+MODIS_Ref_500 = ee.ImageCollection(lst_paths[selected_lst_type]['MODIS_Ref_500'])
+
 
 # Define Landsat bands
 L89_Bands = ['SR_B2', 'SR_B3', 'SR_B4', 'SR_B5', 'SR_B6', 'SR_B7', 'ST_B10', 'QA_PIXEL']
@@ -199,16 +226,23 @@ def user_input_map(lat, lon, buffer_size, date):
 
 
 def main():
+    global selected_lst_type, Modis, MODIS_Ref_250, MODIS_Ref_500
+    
     # Inputs in the sidebar
     st.sidebar.title("Enter Search Criteria")
     lat = st.sidebar.number_input("Latitude", value=27.2)
     lon = st.sidebar.number_input("Longitude", value=77.45)
-    radius = st.sidebar.number_input("Sqaure Buffer distance (m)", value=20000)
-    date_input = st.sidebar.date_input("Date",value=pd.Timestamp('2023-01-16'))
+    radius = st.sidebar.number_input("Square Buffer distance (m)", value=20000)
+    date_input = st.sidebar.date_input("Date", value=pd.Timestamp('2023-01-16'))
     
-    lst_types = [ 'Aqua_daytime', 'Aqua_nighttime','Terra_daytime', 'Terra_nighttime']
-    selected_lst_type = st.sidebar.selectbox("Select LST Type", lst_types,index=lst_types.index('Aqua_daytime'))
+    lst_types = ['Aqua_daytime', 'Aqua_nighttime', 'Terra_daytime', 'Terra_nighttime']
+    selected_lst_type = st.sidebar.selectbox("Select LST Type", lst_types, index=lst_types.index(selected_lst_type))
     
+    # Update variables based on the selected LST type
+    Modis = ee.ImageCollection(lst_paths[selected_lst_type]['Modis'])
+    MODIS_Ref_250 = ee.ImageCollection(lst_paths[selected_lst_type]['MODIS_Ref_250'])
+    MODIS_Ref_500 = ee.ImageCollection(lst_paths[selected_lst_type]['MODIS_Ref_500'])
+    st.write("Path",lst_paths[selected_lst_type]['Modis'])
     # Run the code when the user clicks the button
     if st.sidebar.button("Submit"):
         clip_roi,date_str=user_input_map(lat, lon, radius, date_input)
