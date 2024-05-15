@@ -88,12 +88,12 @@ bands=['DOY','Elevation', 'SR_B4','sur_refl_b07', 'SSRDH', 'NDVI','NDBI','LST_Da
 def LandsatUpscale(img):
     return img.reduceResolution(reducer=ee.Reducer.mean(), maxPixels=1024).reproject(crs=targetProjection, scale=100)
 
-def downsampledLST(img):
-    return img.resample('bilinear').reproject(crs=targetProjection, scale=100)
+def downsampledLST(img,clip_roi):
+    return img.resample('bilinear').reproject(crs=targetProjection, scale=100).clip(clip_roi)
     
-def downsampledMODIS_LST(img):
+def downsampledMODIS_LST(img,clip_roi):
     original_lst=img.select('LST_Day_1km').rename('Original_MOD_LST')
-    return img.resample('bilinear').reproject(crs=targetProjection, scale=100).addBands(original_lst)
+    return img.resample('bilinear').reproject(crs=targetProjection, scale=100).addBands(original_lst).clip(clip_roi)
     
 def NDVI_NDBI_NDWI(img):
     ndvi = img.normalizedDifference(['SR_B5', 'SR_B4']).rename('NDVI')
@@ -110,10 +110,10 @@ def cloudMask(img):
     combinedMask = cloudMask.Or(cloudShadowMask)
     return img.updateMask(combinedMask.Not())
 
-def applyScaleFactors(image):
+def applyScaleFactors(image,clip_roi):
     opticalBands = image.select('SR_B.').multiply(0.0000275).add(-0.2)
     thermalBands = image.select('ST_B.*').multiply(0.00341802).add(149.0)
-    return image.addBands(opticalBands, None, True).addBands(thermalBands, None, True).select(['SR_B3', 'SR_B4', 'SR_B5', 'SR_B6', 'SR_B7', 'ST_B10']).set('Landsat_Time', ee.Date(image.get('system:time_start')).format('YYYY-MM-dd HH:mm'))
+    return image.addBands(opticalBands, None, True).addBands(thermalBands, None, True).clip(clip_roi).select(['SR_B3', 'SR_B4', 'SR_B5', 'SR_B6', 'SR_B7', 'ST_B10']).set('Landsat_Time', ee.Date(image.get('system:time_start')).format('YYYY-MM-dd HH:mm'))
 
 def addBandsToModis(img,LST_band):
     thermalBands = img.select(LST_band).multiply(0.02).rename('LST_Day_1km')
@@ -144,7 +144,7 @@ def downscale(date, clip_roi, Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5,ERA_hour
     end = start.advance(1,'day')
 
     Landsat_Coll = L8.merge(L9).sort('system:time_start').filterDate(start.advance(-32,'days'), end.advance(32,'days')).filterBounds(clip_roi)
-    landsat = Landsat_Coll.map(cloudMask).map(LandsatUpscale).map(applyScaleFactors).map(NDVI_NDBI_NDWI)
+    landsat = Landsat_Coll.map(cloudMask).map(LandsatUpscale).map(lambda img:applyScaleFactors(img,clip_roi)).map(NDVI_NDBI_NDWI)
     Modis = Modis.filterDate(start, end)
     MODIS_Ref_250 = MODIS_Ref_250.filterDate(start, end).select(['sur_refl_b01', 'sur_refl_b02'])
     MODIS_Ref_500 = MODIS_Ref_500.filterDate(start, end).select(['sur_refl_b03', 'sur_refl_b04', 'sur_refl_b05', 'sur_refl_b06', 'sur_refl_b07'])
