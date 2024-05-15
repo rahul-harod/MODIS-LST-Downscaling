@@ -62,6 +62,7 @@ lst_paths = {
 }
 
 # Initialize variables with default paths
+selected_model='ANN_SMWA'
 selected_lst_type = 'Aqua_daytime'
 ERA_hour=8
 LST_band='LST_Day_1km'
@@ -73,14 +74,32 @@ MODIS_Ref_500 = ee.ImageCollection(lst_paths[selected_lst_type]['MODIS_Ref_500']
 # Define Landsat bands
 L89_Bands = ['SR_B2', 'SR_B3', 'SR_B4', 'SR_B5', 'SR_B6', 'SR_B7', 'ST_B10', 'QA_PIXEL']
 
-scaler_X = joblib.load(r"ANN_72_scaler_X.pkl")
-scaler_y = joblib.load(r"ANN_72_scaler_y.pkl")
+scaler_X = None
+scaler_y = None
+best_model = None
 
-with open(r"ANN_72_Model_Arc.json", "r") as json_file:
-    loaded_model_json = json_file.read()
+def load_model_and_scaler(model_name):
+    global scaler_X, scaler_y, best_model
+    
+    model_dir = f"Models/{model_name}/"
+    scaler_X = joblib.load(model_dir + "ANN_72_scaler_X.pkl")
+    scaler_y = joblib.load(model_dir + "ANN_72_scaler_y.pkl")
+    
+    with open(model_dir + "ANN_72_Model_Arc.json", "r") as json_file:
+        loaded_model_json = json_file.read()
 
-best_model = model_from_json(loaded_model_json)
-best_model.load_weights(r"ANN_72_Model_Weights.h5")
+    best_model = model_from_json(loaded_model_json)
+    best_model.load_weights(model_dir + "ANN_72_Model_Weights.h5")
+
+
+# scaler_X = joblib.load(r"ANN_72_scaler_X.pkl")
+# scaler_y = joblib.load(r"ANN_72_scaler_y.pkl")
+
+# with open(r"ANN_72_Model_Arc.json", "r") as json_file:
+#     loaded_model_json = json_file.read()
+
+# best_model = model_from_json(loaded_model_json)
+# best_model.load_weights(r"ANN_72_Model_Weights.h5")
 
 bands=['DOY','Elevation', 'SR_B4','sur_refl_b07', 'SSRDH', 'NDVI','NDBI','LST_Day_1km']
 
@@ -265,8 +284,17 @@ def main():
     radius = st.sidebar.number_input("Square Buffer distance (m)", value=20000)
     date_input = st.sidebar.date_input("Date", value=pd.Timestamp('2023-01-16'))
     
-    lst_types = ['Aqua_daytime', 'Aqua_nighttime', 'Terra_daytime', 'Terra_nighttime']
-    selected_lst_type = st.sidebar.selectbox("Select LST Type", lst_types, index=lst_types.index(selected_lst_type))
+    # Create two columns in the sidebar
+    col1, col2 = st.sidebar.columns([2, 1])  # Adjust the width ratios as needed
+
+    with col1:
+        lst_types = ['Aqua_daytime', 'Aqua_nighttime', 'Terra_daytime', 'Terra_nighttime']
+        selected_lst_type = st.sidebar.selectbox("Select LST Type", lst_types, index=lst_types.index(selected_lst_type))
+
+    with col2:
+        Model_types = ['ANN_L2', 'ANN_SMWA']
+        selected_model = st.sidebar.selectbox("Select Model", Model_types, index=Model_types.index(selected_model))
+        load_model_and_scaler(selected_model)
     
     # Update variables based on the selected LST type
     Modis = ee.ImageCollection(lst_paths[selected_lst_type]['Modis'])
