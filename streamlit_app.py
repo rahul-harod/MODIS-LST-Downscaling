@@ -93,6 +93,7 @@ def load_model_and_scaler_ANN(model_name):
     best_model.load_weights(model_dir + "ANN_72_Model_Weights.h5")
 
 def load_model_and_scaler_ResNet(model_name,num_rows, num_Columns, n_bands):
+    model_dir = f"Models/{model_name}/"
     scaler=joblib.load(model_dir + "ResNet_734_StandardScaler.pkl")
     scaler_X = scaler['scaler_X']
     scaler_y = scaler['scaler_y']
