@@ -2,6 +2,7 @@ from keras.layers import Dropout  # Import Dropout layer
 from keras.layers import Input, Conv2D, BatchNormalization, Activation, ZeroPadding2D, MaxPooling2D, AveragePooling2D,AveragePooling3D, Flatten, Dense, Add
 from keras.models import Model
 from sklearn.model_selection import KFold
+from tensorflow.keras.layers import Reshape
 import numpy as np
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
