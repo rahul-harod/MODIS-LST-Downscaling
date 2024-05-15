@@ -92,7 +92,7 @@ def downsampledLST(img,clip_roi):
     return img.resample('bilinear').reproject(crs=targetProjection, scale=100).clip(clip_roi)
     
 def downsampledMODIS_LST(img,clip_roi):
-    original_lst=img.select('LST_Day_1km').rename('Original_MOD_LST')
+    original_lst=img.select('LST_Day_1km').rename('MODIS_LST')
     return img.resample('bilinear').reproject(crs=targetProjection, scale=100).addBands(original_lst).clip(clip_roi)
     
 def NDVI_NDBI_NDWI(img):
@@ -150,7 +150,7 @@ def downscale(date, clip_roi, Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5,ERA_hour
     MODIS_Ref_500 = MODIS_Ref_500.filterDate(start, end).select(['sur_refl_b03', 'sur_refl_b04', 'sur_refl_b05', 'sur_refl_b06', 'sur_refl_b07'])
     Modis = Modis.combine(MODIS_Ref_250).combine(MODIS_Ref_500)
 
-    Modis = Modis.map(lambda img: addBandsToModis(img,LST_band)).map(lambda img: downsampledMODIS_LST(img, clip_roi)).select(['sur_refl_b03', 'sur_refl_b04', 'sur_refl_b05', 'sur_refl_b06', 'sur_refl_b07', 'LST_Day_1km','Original_MOD_LST'])
+    Modis = Modis.map(lambda img: addBandsToModis(img,LST_band)).map(lambda img: downsampledMODIS_LST(img, clip_roi)).select(['sur_refl_b03', 'sur_refl_b04', 'sur_refl_b05', 'sur_refl_b06', 'sur_refl_b07', 'LST_Day_1km','MODIS_LST'])
     ERA5 = ERA5.filterDate(start, end).select('surface_solar_radiation_downwards_hourly').filter(ee.Filter.eq('hour', ERA_hour)).map(lambda img: downsampledLST(img, clip_roi)).map(lambda image: image.set('system:time_start', ee.Date(image.get('system:time_start')).update(hour=0, minute=0, second=0).millis()))
     filterJoin = ee.Filter.equals(leftField='system:time_start', rightField='system:time_start')
     simpleJoin = ee.Join.inner()
@@ -199,8 +199,8 @@ def Predictions(modisWithClosestLandsat,date_str,selected_lst_type):
     merged_df.set_index(['y', 'x'], inplace=True)
     merged_df = merged_df.to_xarray()
     data['ANN_LST'] = merged_df['ANN_LST']
-    data['ANN_LST'].attrs = {'long_name': 'LST (K)', 'AREA_OR_POINT': 'Area', 'grid_mapping': 'spatial_ref'}
-    data['Original_MOD_LST'].attrs = {'long_name': 'LST (K)', 'AREA_OR_POINT': 'Area', 'grid_mapping': 'spatial_ref'}
+    data['ANN_LST'].attrs = {'long_name': 'ANN LST (K)', 'AREA_OR_POINT': 'Area', 'grid_mapping': 'spatial_ref'}
+    data['MODIS_LST'].attrs = {'long_name': 'MODIS LST (K)', 'AREA_OR_POINT': 'Area', 'grid_mapping': 'spatial_ref'}
     
     # Plot multiple images in subplots
     min_ = np.nanpercentile(df1['ANN_LST'], 1)
@@ -208,7 +208,7 @@ def Predictions(modisWithClosestLandsat,date_str,selected_lst_type):
     
     fig, (ax1, ax2,cax) = plt.subplots(ncols=3 ,figsize=(8, 3.5),gridspec_kw={"width_ratios":[1,1,0.05]})
     # fig.subplots_adjust(wspace=0.1)
-    im1 = data['Original_MOD_LST'].plot(ax=ax1, cmap='jet', vmin=min_, vmax=max_,add_colorbar=False)
+    im1 = data['MODIS_LST'].plot(ax=ax1, cmap='jet', vmin=min_, vmax=max_,add_colorbar=False)
     im2 = data['ANN_LST'].plot(ax=ax2, cmap='jet', vmin=min_, vmax=max_,add_colorbar=False)
     
     ax1.set_title('MODIS LST')
@@ -227,7 +227,7 @@ def Predictions(modisWithClosestLandsat,date_str,selected_lst_type):
     
     # Convert the plot to an image for displaying in Streamlit
     st.pyplot(fig)
-    st.markdown(get_nc_download_link(data[['LST_Day_1km','ANN_LST']],file_name=selected_lst_type+'_Downscaled_LST_'+date_str+'.nc'), unsafe_allow_html=True)
+    st.markdown(get_nc_download_link(data[['MODIS_LST','ANN_LST']],file_name=selected_lst_type+'_Downscaled_LST_'+date_str+'.nc'), unsafe_allow_html=True)
     st.markdown(get_png_download_link(fig, file_name=selected_lst_type+'_Downscaled_LST_Map_'+date_str+'.png'), unsafe_allow_html=True)
     pass
 
