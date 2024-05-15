@@ -75,10 +75,11 @@ MODIS_Ref_500 = ee.ImageCollection(lst_paths[selected_lst_type]['MODIS_Ref_500']
 # Define Landsat bands
 L89_Bands = ['SR_B2', 'SR_B3', 'SR_B4', 'SR_B5', 'SR_B6', 'SR_B7', 'ST_B10', 'QA_PIXEL']
 
+
+global scaler_X, scaler_y, best_model
 scaler_X = None
 scaler_y = None
 best_model = None
-global scaler_X, scaler_y, best_model
 
 def load_model_and_scaler_ANN(model_name):
     model_dir = f"Models/{model_name}/"
