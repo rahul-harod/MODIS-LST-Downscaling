@@ -200,7 +200,7 @@ def user_input_map(lat, lon, buffer_size, date):
 
 def main():
     # Inputs in the sidebar
-    st.sidebar.title("Input Coordinates and Buffer Distance")
+    st.sidebar.title("Enter Search Criteria")
     lat = st.sidebar.number_input("Latitude", value=27.2)
     lon = st.sidebar.number_input("Longitude", value=77.45)
     radius = st.sidebar.number_input("Buffer (m)", value=20000)
