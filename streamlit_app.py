@@ -31,25 +31,18 @@ L8 = ee.ImageCollection("LANDSAT/LC08/C02/T1_L2")
 L9 = ee.ImageCollection("LANDSAT/LC09/C02/T1_L2")
 
 lst_paths = {
-    'Aqua_daytime': {
-        'Modis': "MODIS/061/MYD11A1",
-        'MODIS_Ref_250': "MODIS/061/MYD09GQ",
-        'MODIS_Ref_500': "MODIS/061/MYD09GA",
-        'ERA_hour':8,
-        'LST_band':'LST_Day_1km',
-    },
-    'Aqua_nighttime': {
-        'Modis': "MODIS/061/MYD11A1",
-        'MODIS_Ref_250': "MODIS/061/MYD09GQ",
-        'MODIS_Ref_500': "MODIS/061/MYD09GA",
-        'ERA_hour':20,
-        'LST_band':'LST_Night_1km'
-    },
     'Terra_daytime': {
         'Modis': "MODIS/061/MOD11A1",
         'MODIS_Ref_250': "MODIS/061/MOD09GQ",
         'MODIS_Ref_500': "MODIS/061/MOD09GA",
         'ERA_hour':5,
+        'LST_band':'LST_Day_1km',
+    },
+    'Aqua_daytime': {
+        'Modis': "MODIS/061/MYD11A1",
+        'MODIS_Ref_250': "MODIS/061/MYD09GQ",
+        'MODIS_Ref_500': "MODIS/061/MYD09GA",
+        'ERA_hour':8,
         'LST_band':'LST_Day_1km',
     },
     'Terra_nighttime': {
@@ -58,7 +51,14 @@ lst_paths = {
         'MODIS_Ref_500': "MODIS/061/MOD09GA",
         'ERA_hour':17,
         'LST_band':'LST_Night_1km'
-    }
+    },
+    'Aqua_nighttime': {
+        'Modis': "MODIS/061/MYD11A1",
+        'MODIS_Ref_250': "MODIS/061/MYD09GQ",
+        'MODIS_Ref_500': "MODIS/061/MYD09GA",
+        'ERA_hour':20,
+        'LST_band':'LST_Night_1km'
+    },
 }
 
 # Initialize variables with default paths
@@ -145,7 +145,7 @@ def downscale(date, clip_roi, Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5,ERA_hour
 
     Landsat_Coll = L8.merge(L9).sort('system:time_start').filterDate(start.advance(-32,'days'), end.advance(32,'days')).filterBounds(clip_roi)
     landsat = Landsat_Coll.map(cloudMask).map(LandsatUpscale).map(lambda img:applyScaleFactors(img,clip_roi)).map(NDVI_NDBI_NDWI)
-    Modis = Modis.filterDate(start, end)
+    Modis = Modis.filterDate(start, end).select(LST_band)
     MODIS_Ref_250 = MODIS_Ref_250.filterDate(start, end).select(['sur_refl_b01', 'sur_refl_b02'])
     MODIS_Ref_500 = MODIS_Ref_500.filterDate(start, end).select(['sur_refl_b03', 'sur_refl_b04', 'sur_refl_b05', 'sur_refl_b06', 'sur_refl_b07'])
     Modis = Modis.combine(MODIS_Ref_250).combine(MODIS_Ref_500)
@@ -274,7 +274,8 @@ def main():
     MODIS_Ref_500 = ee.ImageCollection(lst_paths[selected_lst_type]['MODIS_Ref_500'])
     ERA_hour=lst_paths[selected_lst_type]['ERA_hour']
     LST_band=lst_paths[selected_lst_type]['LST_band']
-    # st.write("Path",lst_paths[selected_lst_type]['Modis'])
+    st.write("Path",lst_paths[selected_lst_type]['Modis'])
+    st.write("LST_band",lst_paths[selected_lst_type]['LST_band'])
     # Run the code when the user clicks the button
     if st.sidebar.button("Submit"):
         clip_roi,date_str=user_input_map(lat, lon, radius, date_input)
