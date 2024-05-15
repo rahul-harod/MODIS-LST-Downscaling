@@ -163,7 +163,7 @@ def Predictions(modisWithClosestLandsat,date_str):
         # ax.set_yticks([])
         ax.set_xlabel('')
         ax.set_ylabel('')
-        plt.tight_layout()
+        # plt.tight_layout()
     
     # Convert the plot to an image for displaying in Streamlit
     st.pyplot(fig)
