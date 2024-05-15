@@ -207,7 +207,7 @@ def main():
     date_input = st.sidebar.date_input("Date",value=pd.Timestamp('2023-01-16'))
     
     lst_types = [ 'Aqua_daytime', 'Aqua_nighttime','Terra_daytime', 'Terra_nighttime']
-    selected_lst_type = st.selectbox("Select LST Type", lst_types,index=lst_types.index('Aqua_daytime'))
+    selected_lst_type = st.sidebar.selectbox("Select LST Type", lst_types,index=lst_types.index('Aqua_daytime'))
     
     # Run the code when the user clicks the button
     if st.sidebar.button("Submit"):
