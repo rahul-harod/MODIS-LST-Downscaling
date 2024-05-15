@@ -284,18 +284,14 @@ def main():
     radius = st.sidebar.number_input("Square Buffer distance (m)", value=20000)
     date_input = st.sidebar.date_input("Date", value=pd.Timestamp('2023-01-16'))
     
-    # Create two columns in the sidebar
-    col1, col2 = st.sidebar.columns([2, 1])  # Adjust the width ratios as needed
 
-    with col1:
-        lst_types = ['Aqua_daytime', 'Aqua_nighttime', 'Terra_daytime', 'Terra_nighttime']
-        selected_lst_type = st.sidebar.selectbox("Select LST Type", lst_types, index=lst_types.index(selected_lst_type))
+    lst_types = ['Aqua_daytime', 'Aqua_nighttime', 'Terra_daytime', 'Terra_nighttime']
+    selected_lst_type = st.sidebar.selectbox("Select LST Type", lst_types, index=lst_types.index(selected_lst_type))
 
-    with col2:
-        Model_types = ['ANN_L2', 'ANN_SMWA']
-        selected_model = st.sidebar.selectbox("Select Model", Model_types, index=Model_types.index(selected_model))
-        load_model_and_scaler(selected_model)
-    
+    Model_types = ['ANN_L2', 'ANN_SMWA']
+    selected_model = st.sidebar.selectbox("Select Model", Model_types, index=Model_types.index(selected_model))
+    load_model_and_scaler(selected_model)
+
     # Update variables based on the selected LST type
     Modis = ee.ImageCollection(lst_paths[selected_lst_type]['Modis'])
     MODIS_Ref_250 = ee.ImageCollection(lst_paths[selected_lst_type]['MODIS_Ref_250'])
