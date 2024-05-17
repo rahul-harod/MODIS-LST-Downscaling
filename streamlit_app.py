@@ -16,6 +16,9 @@ from ee import oauth
 import resnet
 
 def add_logo(logo_path):
+    with open(logo_path, "rb") as image_file:
+        encoded_logo = base64.b64encode(image_file.read()).decode()
+    
     logo_str = f"""
         &lt;style&gt;
         .logo-container {{
@@ -29,10 +32,11 @@ def add_logo(logo_path):
         }}
         &lt;/style&gt;
         &lt;div class="logo-container"&gt;
-            &lt;img src="data:image/png;base64,{base64.b64encode(open(logo_path, "rb").read()).decode()}" alt="Logo"&gt;
+            &lt;img src="data:image/png;base64,{encoded_logo}" alt="Logo"&gt;
         &lt;/div&gt;
     """
-    st.markdown(logo_str, unsafe_allow_html=True)
+    with st.sidebar:
+        st.markdown(logo_str, unsafe_allow_html=True)
     
 "# MODIS LST Downscaling"
 def get_auth():
@@ -43,9 +47,9 @@ def get_auth():
     
 get_auth()    
 
-logo_path = 'iitb_logo.png'  # Replace with your logo file path
-with st.sidebar:
-  st.image(logo_path, width=100)
+# logo_path = 'iitb_logo.png'  # Replace with your logo file path
+# with st.sidebar:
+#   st.image(logo_path, width=100)
 
 # Initialize global variables
 targetProjection = ee.Projection('EPSG:32643')
