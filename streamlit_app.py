@@ -352,7 +352,7 @@ def main():
     lst_types = ['Aqua_daytime', 'Aqua_nighttime', 'Terra_daytime', 'Terra_nighttime']
     selected_lst_type = st.sidebar.selectbox("Select LST Type", lst_types, index=lst_types.index(selected_lst_type))
 
-    Model_types = ['ANN_L2', 'ANN_SMWA','ResNet_SMWA']
+    Model_types = ['ANN_L2', 'ANN_SMWA','ResNet_SMWA','ResNet_L2']
     selected_model = st.sidebar.selectbox("Select Model", Model_types, index=Model_types.index(selected_model))
 
     # Update variables based on the selected LST type
