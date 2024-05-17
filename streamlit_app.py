@@ -20,7 +20,7 @@ def add_logo():
         """
         &lt;style&gt;
             [data-testid="stSidebarNav"] {
-                background-image: url("path_to_your_image.png"); /* Replace "path_to_your_image.png" with the path to your local image file */
+                background-image: url("iitb_logo.png"); /* Replace "path_to_your_image.png" with the path to your local image file */
                 background-repeat: no-repeat;
                 padding-top: 120px;
                 background-position: 20px 20px;
