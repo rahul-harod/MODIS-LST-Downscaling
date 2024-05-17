@@ -18,25 +18,20 @@ import resnet
 def add_logo():
     st.markdown(
         """
-        <style>
+        &lt;style&gt;
             [data-testid="stSidebarNav"] {
-                background-image: url(iitb_logo.png);
+                background-image: url("path_to_your_image.png"); /* Replace "path_to_your_image.png" with the path to your local image file */
                 background-repeat: no-repeat;
                 padding-top: 120px;
                 background-position: 20px 20px;
             }
-            [data-testid="stSidebarNav"]::before {
-                content: "My Company Name";
-                margin-left: 20px;
-                margin-top: 20px;
-                font-size: 30px;
-                position: relative;
-                top: 100px;
-            }
-        </style>
+        &lt;/style&gt;
         """,
         unsafe_allow_html=True,
     )
+
+# Example usage
+add_logo()
 
 "# MODIS LST Downscaling"
 def get_auth():
@@ -368,7 +363,6 @@ def user_input_map(lat, lon, buffer_size, date):
 def main():
     
     global selected_lst_type,Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5,ERA_hour,LST_band,selected_model
-    add_logo()
     # Inputs in the sidebar
     st.sidebar.title("Enter Search Criteria")
     lat = st.sidebar.number_input("Latitude", value=27.2)
