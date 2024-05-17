@@ -147,7 +147,7 @@ def calculateTimeDifference(modisImage, landsatImage):
 
 def findClosestLandsat(modisImage,landsat):
     modisDate = ee.Date(modisImage.date())
-    landsatImagesInRange = landsat.filterDate(modisDate.advance(-32, 'day'), modisDate.advance(32, 'day'))
+    landsatImagesInRange = landsat.filterDate(modisDate.advance(-64, 'day'), modisDate.advance(64, 'day'))
     sortedLandsat = landsatImagesInRange.map(lambda landsatImage: landsatImage.set('time_difference', calculateTimeDifference(modisImage, landsatImage))).sort('time_difference')
     closestLandsatImage = ee.Image(sortedLandsat.first())
     return modisImage.addBands(closestLandsatImage).set('MODIS_Time', modisDate.format('YYYY-MM-dd HH:mm')).set('DATE_ACQUIRED', modisDate.format('YYYY-MM-dd')).set('Landsat_Time', closestLandsatImage.get('Landsat_Time'))
@@ -163,7 +163,7 @@ def downscale(date, clip_roi, Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5,ERA_hour
     start = ee.Date(date)
     end = start.advance(1,'day')
 
-    Landsat_Coll = L8.merge(L9).sort('system:time_start').filterDate(start.advance(-32,'days'), end.advance(32,'days')).filterBounds(clip_roi)
+    Landsat_Coll = L8.merge(L9).sort('system:time_start').filterDate(start.advance(-64,'days'), end.advance(64,'days')).filterBounds(clip_roi)
     landsat = Landsat_Coll.map(cloudMask).map(LandsatUpscale).map(lambda img:applyScaleFactors(img,clip_roi)).map(NDVI_NDBI_NDWI)
     Modis = Modis.filterDate(start, end).select(LST_band)
     MODIS_Ref_250 = MODIS_Ref_250.filterDate(start, end).select(['sur_refl_b01', 'sur_refl_b02'])
