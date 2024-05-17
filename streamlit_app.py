@@ -16,7 +16,7 @@ from ee import oauth
 import resnet
 
 def add_logo():
-    st.sidebar.image("iitb_logo.png", width=200)
+    st.sidebar.pyplot("iitb_logo.png", width=200)
     st.markdown(
         """
         &lt;style&gt;
