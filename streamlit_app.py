@@ -152,7 +152,7 @@ def findClosestLandsat(modisImage,landsat):
     closestLandsatImage = ee.Image(sortedLandsat.first())
     return modisImage.addBands(closestLandsatImage).set('MODIS_Time', modisDate.format('YYYY-MM-dd HH:mm')).set('DATE_ACQUIRED', modisDate.format('YYYY-MM-dd')).set('Landsat_Time', closestLandsatImage.get('Landsat_Time'))
 
-def downscale(date, clip_roi, Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5,ERA_hour,LST_band):
+def downscale(date,point, clip_roi, Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5,ERA_hour,LST_band):
     st.write('Date',date)
     elevation = DEM.clip(clip_roi)
     elevation = LandsatUpscale(elevation).rename('Elevation')
@@ -163,7 +163,7 @@ def downscale(date, clip_roi, Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5,ERA_hour
     start = ee.Date(date)
     end = start.advance(1,'day')
 
-    Landsat_Coll = L8.merge(L9).sort('system:time_start').filterDate(start.advance(-64,'days'), end.advance(64,'days')).filterBounds(clip_roi)
+    Landsat_Coll = L8.merge(L9).sort('system:time_start').filterDate(start.advance(-64,'days'), end.advance(64,'days')).filterBounds(point)
     landsat = Landsat_Coll.map(cloudMask).map(LandsatUpscale).map(lambda img:applyScaleFactors(img,clip_roi)).map(NDVI_NDBI_NDWI)
     Modis = Modis.filterDate(start, end).select(LST_band)
     MODIS_Ref_250 = MODIS_Ref_250.filterDate(start, end).select(['sur_refl_b01', 'sur_refl_b02'])
@@ -333,7 +333,7 @@ def user_input_map(lat, lon, buffer_size, date):
         # Display the map in Streamlit
         # m.to_streamlit()
 
-        return clip_roi, date_str
+        return point,clip_roi, date_str
     except Exception as e:
         st.error(f"An error occurred: {str(e)}")
 
@@ -364,8 +364,8 @@ def main():
     st.write(selected_lst_type+': '+selected_model)
     # Run the code when the user clicks the button
     if st.sidebar.button("Submit"):
-        clip_roi,date_str=user_input_map(lat, lon, radius, date_input)
-        modisWithClosestLandsat = downscale(date_str, clip_roi, Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5,ERA_hour,LST_band)
+        point,clip_roi,date_str=user_input_map(lat, lon, radius, date_input)
+        modisWithClosestLandsat = downscale(date_str,point, clip_roi, Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5,ERA_hour,LST_band)
         if selected_model in ['ANN_L2', 'ANN_SMWA']:
             Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_model)
             
