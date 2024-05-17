@@ -18,16 +18,16 @@ import resnet
 def add_logo():
     st.markdown(
         """
-        &lt;style&gt;
+        <style>
             [data-testid="stSidebarNav"] {
-                background-image: url("iitb_logo.png"); /* Replace "path_to_your_image.png" with the path to your local image file */
+                background-image: url("iitb_logo.png");
                 background-repeat: no-repeat;
                 padding-top: 120px;
                 background-position: 20px 20px;
             }
-        &lt;/style&gt;
+         </style>
         """,
-        unsafe_allow_html=True,  # Ensure this argument is correctly set
+        unsafe_allow_html=True,
     )
 
 # Example usage
