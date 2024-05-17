@@ -16,7 +16,7 @@ from ee import oauth
 import resnet
 
 with st.sidebar:
-  st.markdown("iitb_logo.png)", unsafe_allow_html=True)
+  st.markdown("iitb_logo.png", unsafe_allow_html=True)
 
 
 "# MODIS LST Downscaling"
