@@ -360,8 +360,7 @@ def user_input_map(lat, lon, buffer_size, date):
 def main():
 
     with open(logo_path, "rb") as image_file:
-            logo_base64 = base64.b64encode(image_file.read()).decode()
-        # Add the logo to the Streamlit app
+        logo_base64 = base64.b64encode(image_file.read()).decode()
         add_logo(f"data:image/png;base64,{logo_base64}", logo_width, logo_height)
 
     global selected_lst_type, Modis, MODIS_Ref_250, MODIS_Ref_500,ERA_hour,LST_band,selected_model
