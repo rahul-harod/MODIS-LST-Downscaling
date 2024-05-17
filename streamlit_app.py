@@ -25,10 +25,8 @@ def get_auth():
 get_auth()    
 
 logo_path = 'iitb_logo.png'  # Replace with your logo file path
-logo_width = 50  # Adjust the width as needed
-logo_height = 50  # Adjust the height as needed
 with st.sidebar:
-  st.image(logo_path, width=150)
+  st.image(logo_path, width=100)
 
 # Initialize global variables
 targetProjection = ee.Projection('EPSG:32643')
