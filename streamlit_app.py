@@ -18,14 +18,14 @@ import resnet
 def add_logo():
     st.markdown(
         """
-        <style>
-            [data-testid="stSidebarNav"] {
+        &lt;style&gt;
+            .sidebar .sidebar-content {
                 background-image: url("iitb_logo.png");
                 background-repeat: no-repeat;
                 padding-top: 120px;
                 background-position: 20px 20px;
             }
-         </style>
+         &lt;/style&gt;
         """,
         unsafe_allow_html=True,
     )
