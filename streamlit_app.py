@@ -147,7 +147,7 @@ def calculateTimeDifference(modisImage, landsatImage):
 
 def findClosestLandsat(modisImage,landsat):
     modisDate = ee.Date(modisImage.date())
-    landsatImagesInRange = landsat.filterDate(modisDate.advance(-17, 'day'), modisDate.advance(17, 'day'))
+    landsatImagesInRange = landsat.filterDate(modisDate.advance(-32, 'day'), modisDate.advance(32, 'day'))
     sortedLandsat = landsatImagesInRange.map(lambda landsatImage: landsatImage.set('time_difference', calculateTimeDifference(modisImage, landsatImage))).sort('time_difference')
     closestLandsatImage = ee.Image(sortedLandsat.first())
     return modisImage.addBands(closestLandsatImage).set('MODIS_Time', modisDate.format('YYYY-MM-dd HH:mm')).set('DATE_ACQUIRED', modisDate.format('YYYY-MM-dd')).set('Landsat_Time', closestLandsatImage.get('Landsat_Time'))
