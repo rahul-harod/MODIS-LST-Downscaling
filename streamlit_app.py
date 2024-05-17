@@ -11,13 +11,13 @@ import joblib
 from sklearn.preprocessing import StandardScaler
 from tensorflow.keras.models import model_from_json
 import streamlit as st
+from streamlit_extras.app_logo import add_logo
 from google.oauth2 import service_account
 from ee import oauth
 import resnet
 
-with st.sidebar:
-  st.markdown("iitb_logo.png", unsafe_allow_html=True)
-
+def logo():
+    add_logo("iitb_logo.png", height=100)
 
 "# MODIS LST Downscaling"
 def get_auth():
