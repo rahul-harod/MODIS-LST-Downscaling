@@ -17,7 +17,7 @@ from ee import oauth
 import resnet
 
 def logo():
-    add_logo("iitb_logo.png", height=100)
+    add_logo("iitb_logo.png", height=300)
 
 "# MODIS LST Downscaling"
 def get_auth():
