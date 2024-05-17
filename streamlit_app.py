@@ -15,6 +15,25 @@ from google.oauth2 import service_account
 from ee import oauth
 import resnet
 
+def add_logo(logo_path):
+    logo_str = f"""
+        &lt;style&gt;
+        .logo-container {{
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1;
+        }}
+        .logo-container img {{
+            width: 100px; /* Adjust the size as needed */
+        }}
+        &lt;/style&gt;
+        &lt;div class="logo-container"&gt;
+            &lt;img src="data:image/png;base64,{base64.b64encode(open(logo_path, "rb").read()).decode()}" alt="Logo"&gt;
+        &lt;/div&gt;
+    """
+    st.markdown(logo_str, unsafe_allow_html=True)
+    
 "# MODIS LST Downscaling"
 def get_auth():
     service_account_keys=st.secrets['ee_keys']
@@ -343,7 +362,9 @@ def user_input_map(lat, lon, buffer_size, date):
 
 
 def main():
+    
     global selected_lst_type,Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5,ERA_hour,LST_band,selected_model
+    add_logo('iitb_logo.png')
     # Inputs in the sidebar
     st.sidebar.title("Enter Search Criteria")
     lat = st.sidebar.number_input("Latitude", value=27.2)
