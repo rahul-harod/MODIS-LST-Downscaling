@@ -16,16 +16,12 @@ from ee import oauth
 import resnet
 
 def add_logo():
-    st.sidebar.image("iitb_logo.png", width=200)
+    st.sidebar.image("iitb_logo.png", width=150)
     st.markdown(
         """
         &lt;style&gt;
             .sidebar .sidebar-content {
-                display: flex;
-                flex-direction: column;
-                justify-content: flex-start;
-                align-items: center;
-                padding-top: 20px;
+                padding-top: 0px; /* Adjust this value to align with the logo */
             }
          &lt;/style&gt;
         """,
