@@ -18,25 +18,11 @@ import resnet
 def add_logo(logo_path):
     with open(logo_path, "rb") as image_file:
         encoded_logo = base64.b64encode(image_file.read()).decode()
-    
-    logo_str = f"""
-        &lt;style&gt;
-        .logo-container {{
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 1;
-        }}
-        .logo-container img {{
-            width: 100px; /* Adjust the size as needed */
-        }}
-        &lt;/style&gt;
-        &lt;div class="logo-container"&gt;
-            &lt;img src="data:image/png;base64,{encoded_logo}" alt="Logo"&gt;
-        &lt;/div&gt;
-    """
+
+    logo_str = f'&lt;img src="data:image/png;base64,{encoded_logo}" alt="Logo"&gt;'
     st.sidebar.markdown(logo_str, unsafe_allow_html=True)
-    
+
+
 "# MODIS LST Downscaling"
 def get_auth():
     service_account_keys=st.secrets['ee_keys']
