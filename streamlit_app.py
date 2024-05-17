@@ -16,8 +16,8 @@ from ee import oauth
 import resnet
 
 def add_logo():
-    st.sidebar.pyplot("iitb_logo.png", width=200)
-# Example usage
+    st.sidebar.image("iitb_logo.png", width=200)
+
 add_logo()
 
 "# MODIS LST Downscaling"
