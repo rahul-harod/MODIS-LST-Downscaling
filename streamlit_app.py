@@ -27,7 +27,7 @@ def add_logo():
             }
         &lt;/style&gt;
         """,
-        unsafe_allow_html=True,
+        unsafe_allow_html=True,  # Ensure this argument is correctly set
     )
 
 # Example usage
