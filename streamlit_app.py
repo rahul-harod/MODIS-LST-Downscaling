@@ -21,7 +21,11 @@ def add_logo():
         """
         &lt;style&gt;
             .sidebar .sidebar-content {
-                padding-top: 0px; /* Adjust this value to align with the logo */
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+                align-items: center;
+                padding-top: 20px;
             }
          &lt;/style&gt;
         """,
@@ -359,7 +363,6 @@ def user_input_map(lat, lon, buffer_size, date):
 
 
 def main():
-    add_logo()
     global selected_lst_type,Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5,ERA_hour,LST_band,selected_model
     # Inputs in the sidebar
     st.sidebar.title("Enter Search Criteria")
