@@ -25,7 +25,22 @@ def get_auth():
 get_auth()    
 
 logo_path = 'iitb_logo.png'  # Replace with your logo file path
-st.image(logo_path, use_column_width=True)
+logo_width = 50  # Adjust the width as needed
+logo_height = 50  # Adjust the height as needed
+def add_logo(logo_url, width, height):
+    st.markdown(
+        f"""
+        &lt;style&gt;
+        .logo {{
+            position: fixed;
+            top: 10px;
+            right: 10px;
+        }}
+        &lt;/style&gt;
+        &lt;img src="{logo_url}" class="logo" width="{width}" height="{height}"&gt;
+        """,
+        unsafe_allow_html=True
+    )
 
 
 # Initialize global variables
@@ -343,6 +358,12 @@ def user_input_map(lat, lon, buffer_size, date):
 
 
 def main():
+
+    with open(logo_path, "rb") as image_file:
+            logo_base64 = base64.b64encode(image_file.read()).decode()
+        # Add the logo to the Streamlit app
+        add_logo(f"data:image/png;base64,{logo_base64}", logo_width, logo_height)
+
     global selected_lst_type, Modis, MODIS_Ref_250, MODIS_Ref_500,ERA_hour,LST_band,selected_model
     
     # Inputs in the sidebar
