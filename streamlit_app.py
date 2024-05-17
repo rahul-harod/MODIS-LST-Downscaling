@@ -17,17 +17,6 @@ import resnet
 
 def add_logo():
     st.sidebar.pyplot("iitb_logo.png", width=200)
-    st.markdown(
-        """
-        &lt;style&gt;
-            .sidebar .sidebar-content {
-                padding-top: 0px; /* Adjust this value to align with the logo */
-            }
-         &lt;/style&gt;
-        """,
-        unsafe_allow_html=True,
-    )
-
 # Example usage
 add_logo()
 
