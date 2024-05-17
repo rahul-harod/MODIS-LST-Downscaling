@@ -35,8 +35,7 @@ def add_logo(logo_path):
             &lt;img src="data:image/png;base64,{encoded_logo}" alt="Logo"&gt;
         &lt;/div&gt;
     """
-    with st.sidebar:
-        st.markdown(logo_str, unsafe_allow_html=True)
+    st.sidebar.markdown(logo_str, unsafe_allow_html=True)
     
 "# MODIS LST Downscaling"
 def get_auth():
