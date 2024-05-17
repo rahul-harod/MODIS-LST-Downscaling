@@ -24,6 +24,10 @@ def get_auth():
     
 get_auth()    
 
+logo_path = 'iitb_logo.png'  # Replace with your logo file path
+st.image(logo_path, use_column_width=True)
+
+
 # Initialize global variables
 targetProjection = ee.Projection('EPSG:32643')
 ERA5 = ee.ImageCollection("ECMWF/ERA5_LAND/HOURLY")
