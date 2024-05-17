@@ -11,13 +11,32 @@ import joblib
 from sklearn.preprocessing import StandardScaler
 from tensorflow.keras.models import model_from_json
 import streamlit as st
-from streamlit_extras.app_logo import add_logo
 from google.oauth2 import service_account
 from ee import oauth
 import resnet
 
-def logo():
-    add_logo("iitb_logo.png", height=300)
+def add_logo():
+    st.markdown(
+        """
+        <style>
+            [data-testid="stSidebarNav"] {
+                background-image: url(iitb_logo.png);
+                background-repeat: no-repeat;
+                padding-top: 120px;
+                background-position: 20px 20px;
+            }
+            [data-testid="stSidebarNav"]::before {
+                content: "My Company Name";
+                margin-left: 20px;
+                margin-top: 20px;
+                font-size: 30px;
+                position: relative;
+                top: 100px;
+            }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
 "# MODIS LST Downscaling"
 def get_auth():
@@ -349,7 +368,7 @@ def user_input_map(lat, lon, buffer_size, date):
 def main():
     
     global selected_lst_type,Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5,ERA_hour,LST_band,selected_model
-    logo()
+    add_logo()
     # Inputs in the sidebar
     st.sidebar.title("Enter Search Criteria")
     lat = st.sidebar.number_input("Latitude", value=27.2)
