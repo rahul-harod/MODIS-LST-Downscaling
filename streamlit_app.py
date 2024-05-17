@@ -19,8 +19,7 @@ def add_logo(logo_path):
     with open(logo_path, "rb") as image_file:
         encoded_logo = base64.b64encode(image_file.read()).decode()
 
-    logo_str = f'&lt;img src="data:image/png;base64,{encoded_logo}" alt="Logo"&gt;'
-    st.sidebar.markdown(logo_str, unsafe_allow_html=True)
+    st.sidebar.image(encoded_logo, use_column_width=True)
 
 
 "# MODIS LST Downscaling"
