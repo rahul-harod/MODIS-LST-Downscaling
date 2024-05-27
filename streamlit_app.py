@@ -235,8 +235,14 @@ def Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_
     data['MODIS_LST'].attrs = {'long_name': 'MODIS LST (K)', 'AREA_OR_POINT': 'Area', 'grid_mapping': 'spatial_ref'}
     
     # Plot multiple images in subplots
-    min_ = np.nanpercentile(df1['ANN_LST'], 1)
-    max_ = np.nanpercentile(df1['ANN_LST'], 99)
+    min_1 = np.nanpercentile(df1['ANN_LST'], 1)
+    max_1 = np.nanpercentile(df1['ANN_LST'], 99)
+
+    min_2 = np.nanpercentile(df1['LST_Day_1km'], 1)
+    max_2 = np.nanpercentile(df1['LST_Day_1km'], 99)
+
+    min_=np.min(min_1,min_2)
+    max_=np.max(max_1,max_2)
     
     fig, (ax1, ax2,cax) = plt.subplots(ncols=3 ,figsize=(8, 3.5),gridspec_kw={"width_ratios":[1,1,0.05]})
     # fig.subplots_adjust(wspace=0.1)
@@ -295,8 +301,14 @@ def Predictions_ResNet(modisWithClosestLandsat,date_str,selected_lst_type,select
     data['MODIS_LST'].attrs = {'long_name': 'MODIS LST (K)', 'AREA_OR_POINT': 'Area', 'grid_mapping': 'spatial_ref'}
     
     # Plot multiple images in subplots
-    min_ = np.nanpercentile(y_pred_0, 0.02)
-    max_ = np.nanpercentile(y_pred_0, 99.98)
+    min_1 = np.nanpercentile(df1['ANN_LST'], 1)
+    max_1 = np.nanpercentile(df1['ANN_LST'], 99)
+
+    min_2 = np.nanpercentile(df1['LST_Day_1km'], 1)
+    max_2 = np.nanpercentile(df1['LST_Day_1km'], 99)
+
+    min_=np.min(min_1,min_2)
+    max_=np.max(max_1,max_2)
     
     fig, (ax1, ax2,cax) = plt.subplots(ncols=3 ,figsize=(8, 3.5),gridspec_kw={"width_ratios":[1,1,0.05]})
     # fig.subplots_adjust(wspace=0.1)
