@@ -301,8 +301,8 @@ def Predictions_ResNet(modisWithClosestLandsat,date_str,selected_lst_type,select
     data['MODIS_LST'].attrs = {'long_name': 'MODIS LST (K)', 'AREA_OR_POINT': 'Area', 'grid_mapping': 'spatial_ref'}
     
     # Plot multiple images in subplots
-    min_1 = np.nanpercentile(df1['ANN_LST'], 1)
-    max_1 = np.nanpercentile(df1['ANN_LST'], 99)
+    min_1 = np.nanpercentile(df1['ResNet_LST'], 1)
+    max_1 = np.nanpercentile(df1['ResNet_LST'], 99)
 
     min_2 = np.nanpercentile(df1['LST_Day_1km'], 1)
     max_2 = np.nanpercentile(df1['LST_Day_1km'], 99)
