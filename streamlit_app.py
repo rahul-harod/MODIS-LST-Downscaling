@@ -304,8 +304,8 @@ def Predictions_ResNet(modisWithClosestLandsat,date_str,selected_lst_type,select
     min_1 = np.nanpercentile(y_pred_0, 1)
     max_1 = np.nanpercentile(y_pred_0, 99)
 
-    min_2 = np.nanpercentile(X_all_beforenormalized[-1], 1)
-    max_2 = np.nanpercentile(X_all_beforenormalized[-1], 99)
+    min_2 = np.nanpercentile(X_all_beforenormalized[:,-1], 1)
+    max_2 = np.nanpercentile(X_all_beforenormalized[:,-1], 99)
 
     min_ = min(min_1, min_2)
     max_ = max(max_1, max_2)
