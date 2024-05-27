@@ -295,8 +295,8 @@ def Predictions_ResNet(modisWithClosestLandsat,date_str,selected_lst_type,select
     data['MODIS_LST'].attrs = {'long_name': 'MODIS LST (K)', 'AREA_OR_POINT': 'Area', 'grid_mapping': 'spatial_ref'}
     
     # Plot multiple images in subplots
-    min_ = np.nanpercentile(y_pred_0, 1)
-    max_ = np.nanpercentile(y_pred_0, 99)
+    min_ = np.nanpercentile(y_pred_0, 0.02)
+    max_ = np.nanpercentile(y_pred_0, 99.98)
     
     fig, (ax1, ax2,cax) = plt.subplots(ncols=3 ,figsize=(8, 3.5),gridspec_kw={"width_ratios":[1,1,0.05]})
     # fig.subplots_adjust(wspace=0.1)
