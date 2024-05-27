@@ -285,8 +285,8 @@ def Predictions_ResNet(modisWithClosestLandsat,date_str,selected_lst_type,select
     num_Columns=X_patches.shape[1]
     
     load_model_and_scaler_ResNet(selected_model,num_rows, num_Columns, 8)
-    X_all_normalized = X_patches.reshape(-1, X_patches.shape[-1])
-    X_all_normalized = scaler_X.transform(X_all_normalized)
+    X_all_beforenormalized = X_patches.reshape(-1, X_patches.shape[-1])
+    X_all_normalized = scaler_X.transform(X_all_beforenormalized)
     X_all_normalized = X_all_normalized.reshape(X_patches.shape)
     X_expanded = np.expand_dims(X_all_normalized, axis=0)
     y_pred = best_model.predict(X_expanded)
@@ -301,11 +301,11 @@ def Predictions_ResNet(modisWithClosestLandsat,date_str,selected_lst_type,select
     data['MODIS_LST'].attrs = {'long_name': 'MODIS LST (K)', 'AREA_OR_POINT': 'Area', 'grid_mapping': 'spatial_ref'}
     
     # Plot multiple images in subplots
-    min_1 = np.nanpercentile(df1['ResNet_LST'], 1)
-    max_1 = np.nanpercentile(df1['ResNet_LST'], 99)
+    min_1 = np.nanpercentile(y_pred_0, 1)
+    max_1 = np.nanpercentile(y_pred_0, 99)
 
-    min_2 = np.nanpercentile(df1['LST_Day_1km'], 1)
-    max_2 = np.nanpercentile(df1['LST_Day_1km'], 99)
+    min_2 = np.nanpercentile(X_all_beforenormalized[-1], 1)
+    max_2 = np.nanpercentile(X_all_beforenormalized[-1], 99)
 
     min_ = min(min_1, min_2)
     max_ = max(max_1, max_2)
