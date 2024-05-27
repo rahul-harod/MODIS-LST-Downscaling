@@ -241,8 +241,8 @@ def Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_
     min_2 = np.nanpercentile(df1['LST_Day_1km'], 1)
     max_2 = np.nanpercentile(df1['LST_Day_1km'], 99)
 
-    min_=np.min(min_1,min_2)
-    max_=np.max(max_1,max_2)
+    min_ = min(min_1, min_2)
+    max_ = max(max_1, max_2)
     
     fig, (ax1, ax2,cax) = plt.subplots(ncols=3 ,figsize=(8, 3.5),gridspec_kw={"width_ratios":[1,1,0.05]})
     # fig.subplots_adjust(wspace=0.1)
@@ -307,8 +307,8 @@ def Predictions_ResNet(modisWithClosestLandsat,date_str,selected_lst_type,select
     min_2 = np.nanpercentile(df1['LST_Day_1km'], 1)
     max_2 = np.nanpercentile(df1['LST_Day_1km'], 99)
 
-    min_=np.min(min_1,min_2)
-    max_=np.max(max_1,max_2)
+    min_ = min(min_1, min_2)
+    max_ = max(max_1, max_2)
     
     fig, (ax1, ax2,cax) = plt.subplots(ncols=3 ,figsize=(8, 3.5),gridspec_kw={"width_ratios":[1,1,0.05]})
     # fig.subplots_adjust(wspace=0.1)
