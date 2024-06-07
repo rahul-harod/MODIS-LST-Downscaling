@@ -31,7 +31,6 @@ def get_auth():
 get_auth()    
 
 
-ee.Initialize()
 selected_model='ANN'
 selected_lst_type = 'Aqua_day'
 
