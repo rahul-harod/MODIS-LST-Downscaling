@@ -46,8 +46,8 @@ def cloudMask(img):
 
 def Harmonized_LS(date_str,roi):
 
-    SDate = date_str.advance(-17, 'day')
-    EDate = date_str.advance(17, 'day')
+    SDate = date_str.advance(-32, 'day')
+    EDate = date_str.advance(32, 'day')
 
     sentinel2B = ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED").filterDate(SDate, EDate).filterBounds(roi)\
                     .filter(ee.Filter.eq('SPACECRAFT_NAME', 'Sentinel-2B')).map(CloudMaskS2)
