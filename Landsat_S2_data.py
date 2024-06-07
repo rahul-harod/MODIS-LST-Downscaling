@@ -1,8 +1,5 @@
 import ee
 
-# Initialize the Earth Engine module
-ee.Initialize()
-
 # Define the correction factors
 correctionFactors = {
     'B2': {'slopeA': 0.9778, 'offsetA': -0.004, 'slopeB': 0.9778, 'offsetB': -0.004},
