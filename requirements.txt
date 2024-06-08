@@ -13,4 +13,6 @@ xgboost
 leafmap
 ipyleaflet 
 typing-extensions
+geemap
+click==8
 # git+https://github.com/giswqs/leafmap
