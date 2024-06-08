@@ -298,7 +298,7 @@ def user_input_map(lat, lon, buffer_size, date):
         # Create a buffer around the point
         clip_roi = point.buffer(buffer_size).bounds()
 
-        m = geemap.Map(basemap='HYBRID')
+        m = geemap.Map()
         url = 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}'
         m.add_tile_layer(url, name='Google Map', attribution='Google')
         
