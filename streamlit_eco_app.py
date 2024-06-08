@@ -209,9 +209,10 @@ def Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_
     st.pyplot(fig)
     st.markdown(get_nc_download_link(data[['Original_MODIS_LST','ANN_LST']],file_name=selected_lst_type+'_Downscaled_LST_'+date_str+'_'+selected_model+'.nc'), unsafe_allow_html=True)
     st.markdown(get_png_download_link(fig, file_name=selected_lst_type+'_Downscaled_LST_Map_'+date_str+'_'+selected_model+'.png'), unsafe_allow_html=True)
-
-    out_cog=gee.numpy_to_cog(data['ANN_LST'].values)
-    map.add_raster(out_cog, cmap='jet', vmin=min_, vmax=max_, layer_name="ANN_LST")
+    
+    out_cog = "ndvi.tif"
+    out_cog1=gee.numpy_to_cog(data['ANN_LST'].values,out_cog)
+    map.add_raster(out_cog1, cmap='jet', vmin=min_, vmax=max_, layer_name="ANN_LST")
 
     
     pass
