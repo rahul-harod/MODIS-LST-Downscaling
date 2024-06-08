@@ -38,7 +38,7 @@ get_auth()
 
 
 selected_model='ANN'
-selected_lst_type = 'Aqua_day'
+selected_lst_type = 'Terra_day'
 
 targetProjection = ee.Projection('EPSG:32643')
 ERA5 = ee.ImageCollection("ECMWF/ERA5_LAND/HOURLY")
@@ -317,7 +317,7 @@ def main():
     lat = st.sidebar.number_input("Latitude", value=23.15)
     lon = st.sidebar.number_input("Longitude", value=88.40)
     radius = st.sidebar.number_input("Square Buffer distance (m)", value=20000)
-    date_input = st.sidebar.date_input("Date", value=pd.Timestamp('2024-04-01'))
+    date_input = st.sidebar.date_input("Date", value=pd.Timestamp('2024-02-29'))
     
 
     lst_types = ['Aqua_day', 'Aqua_night', 'Terra_day', 'Terra_night']
@@ -330,10 +330,10 @@ def main():
     Modis = ee.ImageCollection(lst_paths[selected_lst_type]['Modis'])
     MODIS_Ref_500 = ee.ImageCollection(lst_paths[selected_lst_type]['MODIS_Ref_500'])
     LST_band=lst_paths[selected_lst_type]['LST_band']
-    st.write(selected_lst_type+': '+selected_model)
     # Run the code when the user clicks the button
     if st.sidebar.button("Submit"):
         point,clip_roi,date_str=user_input_map(lat, lon, radius, date_input)
+        st.write(selected_lst_type+': '+selected_model)
         modisWithClosestLandsat = downscale(date_str,point, clip_roi, Modis, MODIS_Ref_500,LST_band)
         if selected_model in ['ANN']:
             Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_model)
