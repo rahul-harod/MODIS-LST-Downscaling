@@ -2,8 +2,7 @@ streamlit
 streamlit_extras
 streamlit-folium
 geopandas
-leafmap
-typing_extensions==4.5.0
+folium
 wxee
 tqdm
 joblib
