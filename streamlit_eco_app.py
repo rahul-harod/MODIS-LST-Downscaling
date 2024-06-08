@@ -17,7 +17,7 @@ from ee import oauth
 # import resnet
 import xgboost as xgb
 from streamlit_folium import folium_static
-import geemap.eefolium as geemap
+import geemap
 
 def add_logo():
     st.sidebar.image("iitb_logo.png", width=200)
