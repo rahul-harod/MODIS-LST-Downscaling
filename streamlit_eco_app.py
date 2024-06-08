@@ -173,7 +173,8 @@ def Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_
     data['ANN_LST'] = merged_df['ANN_LST']
     data['ANN_LST'].attrs = {'long_name': 'ANN LST (K)', 'AREA_OR_POINT': 'Area', 'grid_mapping': 'spatial_ref'}
     data['Original_MODIS_LST'].attrs = {'long_name': 'MODIS LST (K)', 'AREA_OR_POINT': 'Area', 'grid_mapping': 'spatial_ref'}
-    map.add_raster(data['ANN_LST'],{},'R')
+    map.add_netcdf( data['ANN_LST'], vmin=280, vmax=300,
+                 layer_name='NetCDF layer', shift_lon=True, lat='y', lon='x')
 
 
     # Plot multiple images in subplots
