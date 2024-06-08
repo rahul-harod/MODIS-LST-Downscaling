@@ -17,9 +17,7 @@ from ee import oauth
 import resnet
 import xgboost as xgb
 from streamlit_folium import folium_static
-import geemap
-geemap.ee_initialize()
-import geemap.foliumap as geemap
+from ipyleaflet import Map, basemaps,Rectangle
 
 def add_logo():
     st.sidebar.image("iitb_logo.png", width=200)
@@ -291,10 +289,7 @@ def user_input_map(lat, lon, buffer_size, date):
         # Create a buffer around the point
         clip_roi = point.buffer(buffer_size).bounds()
 
-        m=geemap.Map()
-        m.addLayerControl()
-
-        # call to render Folium map in Streamlit
+        m = Map(center=(lat, lon), zoom=10, basemap=basemaps.Esri.WorldImagery)
         folium_static(m)
         
         return point, clip_roi, date_str
