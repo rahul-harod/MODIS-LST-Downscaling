@@ -268,33 +268,30 @@ def Predictions_XGBoost(modisWithClosestLandsat,date_str,selected_lst_type,selec
     pass
 
 def display_map(lat, lon, zoom=10):
-    # Create a folium map centered at the given latitude and longitude
-    folium_map = folium.Map(location=[lat, lon], zoom_start=zoom)
-    # Add layer control to the map
-    folium.LayerControl().add_to(folium_map)
-    # Display the map using streamlit_folium
-    st_folium(folium_map, width=300, height=300)
+    try:
+        # Create a folium map centered at the given latitude and longitude
+        folium_map = folium.Map(location=[lat, lon], zoom_start=zoom)
+        # Add layer control to the map
+        folium.LayerControl().add_to(folium_map)
+        # Display the map using streamlit_folium
+        st_folium(folium_map, width=300, height=300)
+    except Exception as e:
+        st.error(f"Error displaying map: {str(e)}")
 
-
-
+# Function to process user input and display the map
 def user_input_map(lat, lon, buffer_size, date):
     try:
         date_str = date.strftime('%Y-%m-%d')
         # Create a point geometry
         point = ee.Geometry.Point(lon, lat)
-        
         # Create a buffer around the point
         clip_roi = point.buffer(buffer_size).bounds()
+        # Display the map
         display_map(lat, lon, zoom=10)
-        # m = leafmap.Map(center=(lat, lon), zoom=8)
-        # m.add_basemap("SATELLITE")
-        # m.add_marker(location=(lat, lon), popup="Selected Region")
-        # st.write(m.to_streamlit())
-
-        return point,clip_roi, date_str
+        return point, clip_roi, date_str
     except Exception as e:
         st.error(f"An error occurred: {str(e)}")
-
+        return None, None, None
 
 def main():
     global selected_lst_type,Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5,ERA_hour,LST_band,selected_model
