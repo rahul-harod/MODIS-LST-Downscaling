@@ -315,10 +315,10 @@ def main():
     global selected_lst_type,Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5,ERA_hour,LST_band,selected_model
     # Inputs in the sidebar
     st.sidebar.title("Enter Search Criteria")
-    lat = st.sidebar.number_input("Latitude", value=27.2)
-    lon = st.sidebar.number_input("Longitude", value=77.45)
+    lat = st.sidebar.number_input("Latitude", value=23.05)
+    lon = st.sidebar.number_input("Longitude", value=88.54)
     radius = st.sidebar.number_input("Square Buffer distance (m)", value=20000)
-    date_input = st.sidebar.date_input("Date", value=pd.Timestamp('2023-01-16'))
+    date_input = st.sidebar.date_input("Date", value=pd.Timestamp('2024-04-01'))
     
 
     lst_types = ['Aqua_day', 'Aqua_night', 'Terra_day', 'Terra_night']
