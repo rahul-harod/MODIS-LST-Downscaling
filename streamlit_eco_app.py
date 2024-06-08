@@ -313,19 +313,11 @@ def user_input_map(lat, lon, buffer_size, date):
 def main():
     global selected_lst_type,Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5,ERA_hour,LST_band,selected_model
     # Inputs in the sidebar
-    st.sidebar.markdown("<h1 style='text-align: center;'>Enter Search Criteria</h1>", unsafe_allow_html=True)  # Centered title
-    sidebar_height = 400  # Fixed height for the sidebar
-    # st.sidebar.title("Enter Search Criteria")
-    # lat = st.sidebar.number_input("Latitude", value=23.15)
-    # lon = st.sidebar.number_input("Longitude", value=88.40)
-    # radius = st.sidebar.number_input("Square Buffer distance (m)", value=20000)
-    # date_input = st.sidebar.date_input("Date", value=pd.Timestamp('2024-02-29'))
-    with st.sidebar:
-        st.markdown(f'<style>div.row-widget.stRadio > div{sidebar_height}px</style>', unsafe_allow_html=True)  # Fixing height of radio buttons
-        lat = st.number_input("Latitude", value=23.15)
-        lon = st.number_input("Longitude", value=88.40)
-        radius = st.number_input("Square Buffer distance (m)", value=20000)
-        date_input = st.date_input("Date", value=pd.Timestamp('2024-02-29'))
+    st.sidebar.title("Enter Search Criteria")
+    lat = st.sidebar.number_input("Latitude", value=23.15)
+    lon = st.sidebar.number_input("Longitude", value=88.40)
+    radius = st.sidebar.number_input("Square Buffer distance (m)", value=20000)
+    date_input = st.sidebar.date_input("Date", value=pd.Timestamp('2024-02-29')
     
 
     lst_types = ['Aqua_day', 'Aqua_night', 'Terra_day', 'Terra_night']
