@@ -286,8 +286,6 @@ def user_input_map(lat, lon, buffer_size, date):
         point = ee.Geometry.Point(lon, lat)
         # Create a buffer around the point
         clip_roi = point.buffer(buffer_size).bounds()
-        # Display the map
-        display_map(lat, lon, zoom=10)
         return point, clip_roi, date_str
     except Exception as e:
         st.error(f"An error occurred: {str(e)}")
@@ -320,10 +318,12 @@ def main():
         modisWithClosestLandsat = downscale(date_str,point, clip_roi, Modis, MODIS_Ref_500,LST_band)
         if selected_model in ['ANN']:
             Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_model)
-            
+            # Display the map
+            display_map(lat, lon, zoom=10)
         if selected_model in ['XGBoost']:
             Predictions_XGBoost(modisWithClosestLandsat,date_str,selected_lst_type,selected_model)
-            
+            # Display the map
+            display_map(lat, lon, zoom=10)
         st.sidebar.success("Code execution completed successfully!")
 
 if __name__ == "__main__":
