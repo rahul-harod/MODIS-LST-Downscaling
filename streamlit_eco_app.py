@@ -302,7 +302,7 @@ def user_input_map(lat, lon, buffer_size, date):
         
 
         m = geemap.Map(basemap='HYBRID')
-        m.addLayer(clip_roi.setOptions(style=vis_params),{},'Satellite')
+        m.addLayer(ee.FeatureCollection(clip_roi.style(vis_params)),{},'Satellite')
         m.centerObject(clip_roi,10)
         m.to_streamlit(height=500,width=500)
         
