@@ -12,4 +12,6 @@ keras
 xgboost
 geemap
 leafmap
+ipyleaflet 
+typing-extensions
 # git+https://github.com/giswqs/leafmap
