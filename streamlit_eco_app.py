@@ -282,14 +282,13 @@ def Predictions_XGBoost(modisWithClosestLandsat,date_str,selected_lst_type,selec
 #     except Exception as e:
 #         st.error(f"Error displaying map: {str(e)}")
 
-vis_params = {
-            'color': 'Yellow', 
-            'pointSize': 3,
-            'pointShape': 'star5',
-            'width': 2,
-            'lineType': 'solid',
-            'fillColor': '00000000',
-        }
+vis_params_vector = {
+      'color': '#FFFF00', 
+      'width': 2,
+      'lineType': 'solid',
+      'fillColor': '00000000',
+  }
+        
     
 # Function to process user input and display the map
 def user_input_map(lat, lon, buffer_size, date):
