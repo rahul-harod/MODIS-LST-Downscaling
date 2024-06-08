@@ -14,7 +14,7 @@ from tensorflow.keras.models import model_from_json
 import streamlit as st
 from google.oauth2 import service_account
 from ee import oauth
-import resnet
+# import resnet
 import xgboost as xgb
 from streamlit_folium import folium_static
 import geemap.eefolium as geemap
