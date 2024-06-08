@@ -19,6 +19,8 @@ import xgboost as xgb
 from streamlit_folium import folium_static
 import geemap
 
+geemap.ee_initialize()
+
 def add_logo():
     st.sidebar.image("iitb_logo.png", width=200)
 
