@@ -10,4 +10,6 @@ scikit-learn
 tensorflow==2.13.0
 keras
 xgboost
+geemap
+leafmap
 # git+https://github.com/giswqs/leafmap
