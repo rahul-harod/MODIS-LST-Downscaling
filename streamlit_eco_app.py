@@ -17,7 +17,6 @@ from ee import oauth
 # import resnet
 import xgboost as xgb
 from streamlit_folium import folium_static
-import geemap
 import geemap.eefolium as geemap
 
 def add_logo():
@@ -280,6 +279,26 @@ def Predictions_XGBoost(modisWithClosestLandsat,date_str,selected_lst_type,selec
 #     except Exception as e:
 #         st.error(f"Error displaying map: {str(e)}")
 
+with st.echo():
+    import streamlit as st
+    from streamlit_folium import folium_static
+    import geemap.eefolium as geemap
+    import ee
+
+    m = geemap.Map()
+    dem = ee.Image('USGS/SRTMGL1_003')
+
+    vis_params = {
+    'min': 0,
+    'max': 4000,
+    'palette': ['006633', 'E5FFCC', '662A00', 'D8D8D8', 'F5F5F5']}
+
+    m.addLayer(dem, vis_params, 'SRTM DEM', True, 1)
+    m.addLayerControl()
+
+    # call to render Folium map in Streamlit
+    folium_static(m)
+    
 # Function to process user input and display the map
 def user_input_map(lat, lon, buffer_size, date):
     try:
