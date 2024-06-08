@@ -293,7 +293,7 @@ def user_input_map(lat, lon, buffer_size, date):
         m = geemap.Map(basemap='HYBRID')
         m.addLayer(clip_roi)
         m.centerObject(clip_roi,12)
-        folium_static(m)
+        m.to_streamlit(height=600)
         
         return point, clip_roi, date_str
     except Exception as e:
