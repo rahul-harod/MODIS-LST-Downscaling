@@ -173,8 +173,6 @@ def Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_
     data['ANN_LST'] = merged_df['ANN_LST']
     data['ANN_LST'].attrs = {'long_name': 'ANN LST (K)', 'AREA_OR_POINT': 'Area', 'grid_mapping': 'spatial_ref'}
     data['Original_MODIS_LST'].attrs = {'long_name': 'MODIS LST (K)', 'AREA_OR_POINT': 'Area', 'grid_mapping': 'spatial_ref'}
-    map.add_netcdf( data['ANN_LST'], vmin=280, vmax=300,
-                 layer_name='NetCDF layer', shift_lon=True, lat='y', lon='x')
 
 
     # Plot multiple images in subplots
@@ -210,6 +208,7 @@ def Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_
     st.pyplot(fig)
     st.markdown(get_nc_download_link(data[['Original_MODIS_LST','ANN_LST']],file_name=selected_lst_type+'_Downscaled_LST_'+date_str+'_'+selected_model+'.nc'), unsafe_allow_html=True)
     st.markdown(get_png_download_link(fig, file_name=selected_lst_type+'_Downscaled_LST_Map_'+date_str+'_'+selected_model+'.png'), unsafe_allow_html=True)
+    map.add_netcdf( filename=get_nc_download_link(data[['Original_MODIS_LST','ANN_LST']]),variables='ANN_LST', vmin=280, vmax=300,layer_name='NetCDF layer', lat='y', lon='x')
     pass
 
 
