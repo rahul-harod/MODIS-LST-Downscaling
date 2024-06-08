@@ -299,7 +299,7 @@ def user_input_map(lat, lon, buffer_size, date):
         clip_roi = point.buffer(buffer_size).bounds()
 
         m = geemap.Map(basemap='HYBRID')
-        url = 'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}'
+        url = 'https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}'
         m.add_tile_layer(url, name='Google Map', attribution='Google')
         
         m.addLayer(ee.FeatureCollection(clip_roi).style(**style), {}, 'roi')
