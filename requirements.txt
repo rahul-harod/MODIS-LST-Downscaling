@@ -9,4 +9,5 @@ joblib
 scikit-learn
 tensorflow==2.13.0
 keras
+xgboost
 # git+https://github.com/giswqs/leafmap
