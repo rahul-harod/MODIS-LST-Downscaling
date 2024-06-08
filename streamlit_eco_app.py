@@ -298,7 +298,7 @@ def user_input_map(lat, lon, buffer_size, date):
         # Create a buffer around the point
         clip_roi = point.buffer(buffer_size).bounds()
 
-        m = geemap.Map(basemap='HYBRID')
+        m = geemap.Map(basemap='HYBRID',lite_mode=True)
         
         m.addLayer(ee.FeatureCollection(clip_roi).style(**style), {}, 'Satellite')
         m.centerObject(clip_roi, 10)
