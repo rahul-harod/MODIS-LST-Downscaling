@@ -314,8 +314,8 @@ def main():
     global selected_lst_type,Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5,ERA_hour,LST_band,selected_model
     # Inputs in the sidebar
     st.sidebar.markdown("<h1 style='text-align: center;'>Enter Search Criteria</h1>", unsafe_allow_html=True)  # Centered title
-    sidebar_height = 600  # Fixed height for the sidebar
-    st.sidebar.title("Enter Search Criteria")
+    sidebar_height = 400  # Fixed height for the sidebar
+    # st.sidebar.title("Enter Search Criteria")
     # lat = st.sidebar.number_input("Latitude", value=23.15)
     # lon = st.sidebar.number_input("Longitude", value=88.40)
     # radius = st.sidebar.number_input("Square Buffer distance (m)", value=20000)
