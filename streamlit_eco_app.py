@@ -10,6 +10,7 @@ import joblib
 import Landsat_S2_data
 import folium
 from streamlit_folium import st_folium
+from streamlit_folium import folium_static
 from sklearn.preprocessing import StandardScaler
 from tensorflow.keras.models import model_from_json
 import streamlit as st
@@ -274,7 +275,7 @@ def display_map(lat, lon, zoom=10):
         # Add layer control to the map
         folium.LayerControl().add_to(folium_map)
         # Display the map using streamlit_folium
-        st_folium(folium_map, width=300, height=300)
+        folium_static(folium_map, width=300, height=300)
     except Exception as e:
         st.error(f"Error displaying map: {str(e)}")
 
