@@ -8,7 +8,7 @@ import pandas as pd
 import os
 import joblib
 import Landsat_S2_data
-# import leafmap
+import leafmap.foliumap as leafmap
 from sklearn.preprocessing import StandardScaler
 from tensorflow.keras.models import model_from_json
 import streamlit as st
@@ -269,21 +269,16 @@ def Predictions_XGBoost(modisWithClosestLandsat,date_str,selected_lst_type,selec
 def user_input_map(lat, lon, buffer_size, date):
     try:
         date_str = date.strftime('%Y-%m-%d')
-        
-        # Create a Map object
-        # m = leafmap.Map(center=[lat, lon], zoom=6)
-
-        # # Add a basemap
-        # m.add_basemap('HYBRID')
-        
         # Create a point geometry
         point = ee.Geometry.Point(lon, lat)
         
         # Create a buffer around the point
         clip_roi = point.buffer(buffer_size).bounds()
         
-        # Display the map in Streamlit
-        # m.to_streamlit()
+        m = leafmap.Map(center=(lat, lon), zoom=8)
+        m.add_basemap("SATELLITE")
+        m.add_marker(location=(lat, lon), popup="Selected Region")
+        st.write(m.to_streamlit())
 
         return point,clip_roi, date_str
     except Exception as e:
