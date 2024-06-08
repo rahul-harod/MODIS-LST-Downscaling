@@ -302,9 +302,9 @@ def user_input_map(lat, lon, buffer_size, date):
         
 
         m = geemap.Map(basemap='HYBRID')
-        m.addLayer(clip_roi,vis_params,'Satellite')
+        m.addLayer(clip_roi.style(vis_params),{},'Satellite')
         m.centerObject(clip_roi,10)
-        m.to_streamlit(height=500)
+        m.to_streamlit(height=500,width=500)
         
         return point, clip_roi, date_str
     except Exception as e:
