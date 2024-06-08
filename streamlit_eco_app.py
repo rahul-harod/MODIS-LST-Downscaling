@@ -9,7 +9,6 @@ import os
 import joblib
 import Landsat_S2_data
 import folium
-from streamlit_folium import st_folium
 from streamlit_folium import folium_static
 from sklearn.preprocessing import StandardScaler
 from tensorflow.keras.models import model_from_json
@@ -268,16 +267,16 @@ def Predictions_XGBoost(modisWithClosestLandsat,date_str,selected_lst_type,selec
     st.markdown(get_png_download_link(fig, file_name=selected_lst_type+'_Downscaled_LST_Map_'+date_str+'_'+selected_model+'.png'), unsafe_allow_html=True)
     pass
 
-def display_map(lat, lon, zoom=10):
-    try:
-        # Create a folium map centered at the given latitude and longitude
-        folium_map = folium.Map(location=[lat, lon], zoom_start=zoom)
-        # Add layer control to the map
-        folium.LayerControl().add_to(folium_map)
-        # Display the map using streamlit_folium
-        folium_static(folium_map, width=300, height=300)
-    except Exception as e:
-        st.error(f"Error displaying map: {str(e)}")
+# def display_map(lat, lon, zoom=10):
+#     try:
+#         # Create a folium map centered at the given latitude and longitude
+#         folium_map = folium.Map(location=[lat, lon], zoom_start=zoom)
+#         # Add layer control to the map
+#         folium.LayerControl().add_to(folium_map)
+#         # Display the map using streamlit_folium
+#         folium_static(folium_map, width=300, height=300)
+#     except Exception as e:
+#         st.error(f"Error displaying map: {str(e)}")
 
 # Function to process user input and display the map
 def user_input_map(lat, lon, buffer_size, date):
@@ -287,6 +286,18 @@ def user_input_map(lat, lon, buffer_size, date):
         point = ee.Geometry.Point(lon, lat)
         # Create a buffer around the point
         clip_roi = point.buffer(buffer_size).bounds()
+
+        # Convert the EE geometry object to GeoJSON format
+        clip_geojson = json.loads(clip_roi.getInfo())
+        
+        # Create a Folium map centered at the given latitude and longitude
+        folium_map = folium.Map(location=[lat, lon], zoom_start=10, control_scale=True)
+        # Add the GeoJSON layer representing the clip_roi
+        folium.GeoJson(clip_geojson, name='Clip ROI').add_to(folium_map)
+        # Add layer control to the map
+        folium.LayerControl().add_to(folium_map)
+        # Display the map using streamlit_folium
+        folium_static(folium_map, width=800, height=600)
         return point, clip_roi, date_str
     except Exception as e:
         st.error(f"An error occurred: {str(e)}")
@@ -319,12 +330,10 @@ def main():
         modisWithClosestLandsat = downscale(date_str,point, clip_roi, Modis, MODIS_Ref_500,LST_band)
         if selected_model in ['ANN']:
             Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_model)
-            # Display the map
-            display_map(lat, lon, zoom=10)
+
         if selected_model in ['XGBoost']:
             Predictions_XGBoost(modisWithClosestLandsat,date_str,selected_lst_type,selected_model)
-            # Display the map
-            display_map(lat, lon, zoom=10)
+
         st.sidebar.success("Code execution completed successfully!")
 
 if __name__ == "__main__":
