@@ -17,7 +17,7 @@ from ee import oauth
 import resnet
 import xgboost as xgb
 from streamlit_folium import folium_static
-import geemap.foliumap as geemap
+import geemap
 from typing import Optional, Callable
 
 def add_logo():
@@ -290,7 +290,9 @@ def user_input_map(lat, lon, buffer_size, date):
         # Create a buffer around the point
         clip_roi = point.buffer(buffer_size).bounds()
 
-        m = geemap.Map()
+        m = geemap.Map(basemap='HYBRID')
+        m.addLayer(clip_roi)
+        m.centerObject(clip_roi,12)
         folium_static(m)
         
         return point, clip_roi, date_str
