@@ -9,8 +9,6 @@ import os
 import joblib
 import Landsat_S2_data
 import json
-import folium
-from streamlit_folium import folium_static
 from sklearn.preprocessing import StandardScaler
 from tensorflow.keras.models import model_from_json
 import streamlit as st
@@ -18,6 +16,8 @@ from google.oauth2 import service_account
 from ee import oauth
 import resnet
 import xgboost as xgb
+from streamlit_folium import folium_static
+import geemap.eefolium as geemap
 
 def add_logo():
     st.sidebar.image("iitb_logo.png", width=200)
@@ -288,17 +288,12 @@ def user_input_map(lat, lon, buffer_size, date):
         # Create a buffer around the point
         clip_roi = point.buffer(buffer_size).bounds()
 
-        # Convert the EE geometry object to GeoJSON format
-        clip_geojson = json.loads(clip_roi.getInfo())
+        m=geemap.Map(
+        m.addLayerControl()
+
+        # call to render Folium map in Streamlit
+        folium_static(m)
         
-        # Create a Folium map centered at the given latitude and longitude
-        folium_map = folium.Map(location=[lat, lon], zoom_start=10, control_scale=True)
-        # Add the GeoJSON layer representing the clip_roi
-        folium.GeoJson(clip_geojson, name='Clip ROI').add_to(folium_map)
-        # Add layer control to the map
-        folium.LayerControl().add_to(folium_map)
-        # Display the map using streamlit_folium
-        folium_static(folium_map, width=800, height=600)
         return point, clip_roi, date_str
     except Exception as e:
         st.error(f"An error occurred: {str(e)}")
