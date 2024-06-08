@@ -20,6 +20,8 @@ from streamlit_folium import folium_static
 import geemap.foliumap as geemap
 from typing import Optional, Callable
 
+st.set_page_config(layout="wide")
+
 def add_logo():
     st.sidebar.image("iitb_logo.png", width=200)
 
@@ -280,6 +282,14 @@ def Predictions_XGBoost(modisWithClosestLandsat,date_str,selected_lst_type,selec
 #     except Exception as e:
 #         st.error(f"Error displaying map: {str(e)}")
 
+vis_params = {
+            'color': 'Yellow', 
+            'pointSize': 3,
+            'pointShape': 'star5',
+            'width': 2,
+            'lineType': 'solid',
+            'fillColor': '00000000',
+        }
     
 # Function to process user input and display the map
 def user_input_map(lat, lon, buffer_size, date):
@@ -289,11 +299,12 @@ def user_input_map(lat, lon, buffer_size, date):
         point = ee.Geometry.Point(lon, lat)
         # Create a buffer around the point
         clip_roi = point.buffer(buffer_size).bounds()
+        
 
         m = geemap.Map(basemap='HYBRID')
-        m.addLayer(clip_roi)
-        m.centerObject(clip_roi,12)
-        m.to_streamlit(height=600)
+        m.addLayer(clip_roi,vis_params,'Satellite')
+        m.centerObject(clip_roi,10)
+        m.to_streamlit(height=500)
         
         return point, clip_roi, date_str
     except Exception as e:
