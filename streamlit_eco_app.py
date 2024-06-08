@@ -288,7 +288,7 @@ def user_input_map(lat, lon, buffer_size, date):
         # Create a buffer around the point
         clip_roi = point.buffer(buffer_size).bounds()
 
-        m=geemap.Map(
+        m=geemap.Map()
         m.addLayerControl()
 
         # call to render Folium map in Streamlit
