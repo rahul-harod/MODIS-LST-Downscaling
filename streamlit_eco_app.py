@@ -8,7 +8,8 @@ import pandas as pd
 import os
 import joblib
 import Landsat_S2_data
-import leafmap.foliumap as leafmap
+import folium
+from streamlit_folium import st_folium
 from sklearn.preprocessing import StandardScaler
 from tensorflow.keras.models import model_from_json
 import streamlit as st
@@ -266,6 +267,16 @@ def Predictions_XGBoost(modisWithClosestLandsat,date_str,selected_lst_type,selec
     st.markdown(get_png_download_link(fig, file_name=selected_lst_type+'_Downscaled_LST_Map_'+date_str+'_'+selected_model+'.png'), unsafe_allow_html=True)
     pass
 
+def display_map(lat, lon, zoom=10):
+    # Create a folium map centered at the given latitude and longitude
+    folium_map = folium.Map(location=[lat, lon], zoom_start=zoom)
+    # Add layer control to the map
+    folium.LayerControl().add_to(folium_map)
+    # Display the map using streamlit_folium
+    st_folium(folium_map, width=300, height=300)
+
+
+
 def user_input_map(lat, lon, buffer_size, date):
     try:
         date_str = date.strftime('%Y-%m-%d')
@@ -274,11 +285,11 @@ def user_input_map(lat, lon, buffer_size, date):
         
         # Create a buffer around the point
         clip_roi = point.buffer(buffer_size).bounds()
-        
-        m = leafmap.Map(center=(lat, lon), zoom=8)
-        m.add_basemap("SATELLITE")
-        m.add_marker(location=(lat, lon), popup="Selected Region")
-        st.write(m.to_streamlit())
+        display_map(lat, lon, zoom=10)
+        # m = leafmap.Map(center=(lat, lon), zoom=8)
+        # m.add_basemap("SATELLITE")
+        # m.add_marker(location=(lat, lon), popup="Selected Region")
+        # st.write(m.to_streamlit())
 
         return point,clip_roi, date_str
     except Exception as e:
