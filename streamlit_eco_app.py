@@ -10,7 +10,7 @@ import joblib
 import Landsat_S2_data
 import json
 from sklearn.preprocessing import StandardScaler
-from tensorflow.keras.models import model_from_json
+# from tensorflow.keras.models import model_from_json
 import streamlit as st
 from google.oauth2 import service_account
 from ee import oauth
