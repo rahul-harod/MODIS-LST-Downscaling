@@ -17,6 +17,7 @@ from ee import oauth
 import resnet
 import xgboost as xgb
 from streamlit_folium import folium_static
+import geemap as gee
 import geemap.foliumap as geemap
 from typing import Optional, Callable
 
@@ -209,7 +210,7 @@ def Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_
     st.markdown(get_nc_download_link(data[['Original_MODIS_LST','ANN_LST']],file_name=selected_lst_type+'_Downscaled_LST_'+date_str+'_'+selected_model+'.nc'), unsafe_allow_html=True)
     st.markdown(get_png_download_link(fig, file_name=selected_lst_type+'_Downscaled_LST_Map_'+date_str+'_'+selected_model+'.png'), unsafe_allow_html=True)
     
-    ee_image = geemap.numpy_array_to_ee_image(data['ANN_LST'].values, data.x, data.y)
+    ee_image = gee.numpy_array_to_ee_image(data['ANN_LST'].values, data.x, data.y)
     map.addLayer(ee_image)
     
     pass
