@@ -282,12 +282,12 @@ def Predictions_XGBoost(modisWithClosestLandsat,date_str,selected_lst_type,selec
 #     except Exception as e:
 #         st.error(f"Error displaying map: {str(e)}")
 
-vis_params_vector = {
-      'color': '#FFFF00', 
-      'width': 2,
-      'lineType': 'solid',
-      'fillColor': '00000000',
-  }
+style = {
+            'color': '#FFFF00',
+            'width': 2,
+            'lineType': 'solid',
+            'fillColor': '00000000'
+        }
         
     
 # Function to process user input and display the map
@@ -298,17 +298,18 @@ def user_input_map(lat, lon, buffer_size, date):
         point = ee.Geometry.Point(lon, lat)
         # Create a buffer around the point
         clip_roi = point.buffer(buffer_size).bounds()
-        
 
         m = geemap.Map(basemap='HYBRID')
-        m.addLayer(ee.FeatureCollection(clip_roi).style('color'= '#FFFF00', 'width'= 2,'lineType'='solid','fillColor'= '00000000'),{},'Satellite')
-        m.centerObject(clip_roi,10)
-        m.to_streamlit(height=500,width=500)
+        
+        m.addLayer(ee.FeatureCollection(clip_roi).style(**style), {}, 'Satellite')
+        m.centerObject(clip_roi, 10)
+        m.to_streamlit(height=500, width=500)
         
         return point, clip_roi, date_str
     except Exception as e:
         st.error(f"An error occurred: {str(e)}")
         return None, None, None
+
 
 def main():
     global selected_lst_type,Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5,ERA_hour,LST_band,selected_model
