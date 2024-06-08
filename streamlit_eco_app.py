@@ -317,7 +317,7 @@ def main():
     lat = st.sidebar.number_input("Latitude", value=23.15)
     lon = st.sidebar.number_input("Longitude", value=88.40)
     radius = st.sidebar.number_input("Square Buffer distance (m)", value=20000)
-    date_input = st.sidebar.date_input("Date", value=pd.Timestamp('2024-02-29')
+    date_input = st.sidebar.date_input("Date", value=pd.Timestamp('2024-02-29'))
     
 
     lst_types = ['Aqua_day', 'Aqua_night', 'Terra_day', 'Terra_night']
