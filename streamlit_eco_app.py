@@ -298,9 +298,11 @@ def user_input_map(lat, lon, buffer_size, date):
         # Create a buffer around the point
         clip_roi = point.buffer(buffer_size).bounds()
 
-        m = geemap.Map(basemap='HYBRID',opacity=0.6)
+        m = geemap.Map(basemap='HYBRID')
+        url = 'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}'
+        m.add_tile_layer(url, name='Google Map', attribution='Google')
         
-        m.addLayer(ee.FeatureCollection(clip_roi).style(**style), {}, 'Satellite')
+        m.addLayer(ee.FeatureCollection(clip_roi).style(**style), {}, 'roi')
         m.centerObject(clip_roi, 10)
         m.to_streamlit(height=450)
         
