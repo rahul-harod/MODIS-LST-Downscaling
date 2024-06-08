@@ -1,17 +1,13 @@
 streamlit
 streamlit_extras
 streamlit-folium
-geopandas
 folium
 wxee
 tqdm
 joblib==1.4.0
 scikit-learn
 tensorflow==2.13.0
-keras
 xgboost
 leafmap
-ipyleaflet ==0.18.2
-typing-extensions
-geemap==0.32.1
-click==8.1.7
+geemap
+click
