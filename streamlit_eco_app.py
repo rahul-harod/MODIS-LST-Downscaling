@@ -282,11 +282,10 @@ def Predictions_XGBoost(modisWithClosestLandsat,date_str,selected_lst_type,selec
 #     except Exception as e:
 #         st.error(f"Error displaying map: {str(e)}")
 
-style = {
-            'color': '#FFFF00',
-            'width': 2,
-            'lineType': 'solid',
-            'fillColor': '00000000'
+style = {'color': '#FFFF00',
+        'width': 2,
+        'lineType': 'solid',
+        'fillColor': '00000000'
         }
         
     
@@ -303,7 +302,7 @@ def user_input_map(lat, lon, buffer_size, date):
         
         m.addLayer(ee.FeatureCollection(clip_roi).style(**style), {}, 'Satellite')
         m.centerObject(clip_roi, 10)
-        m.to_streamlit(height=500, width=500)
+        m.to_streamlit(height=450)
         
         return point, clip_roi, date_str
     except Exception as e:
@@ -315,8 +314,8 @@ def main():
     global selected_lst_type,Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5,ERA_hour,LST_band,selected_model
     # Inputs in the sidebar
     st.sidebar.title("Enter Search Criteria")
-    lat = st.sidebar.number_input("Latitude", value=23.05)
-    lon = st.sidebar.number_input("Longitude", value=88.54)
+    lat = st.sidebar.number_input("Latitude", value=23.15)
+    lon = st.sidebar.number_input("Longitude", value=88.40)
     radius = st.sidebar.number_input("Square Buffer distance (m)", value=20000)
     date_input = st.sidebar.date_input("Date", value=pd.Timestamp('2024-04-01'))
     
