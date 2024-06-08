@@ -301,7 +301,7 @@ def user_input_map(lat, lon, buffer_size, date):
         
 
         m = geemap.Map(basemap='HYBRID')
-        m.addLayer(ee.FeatureCollection(clip_roi).style(vis_params_vector),{},'Satellite')
+        m.addLayer(ee.FeatureCollection(clip_roi).style('color'= '#FFFF00', 'width'= 2,'lineType'='solid','fillColor'= '00000000'),{},'Satellite')
         m.centerObject(clip_roi,10)
         m.to_streamlit(height=500,width=500)
         
