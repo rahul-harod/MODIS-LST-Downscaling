@@ -23,7 +23,7 @@ from typing import Optional, Callable
 st.set_page_config(layout="wide")
 
 def add_logo():
-    st.sidebar.image("iitb_logo.png", width=200)
+    st.sidebar.image("iitb_logo.png", width=180)
 
 add_logo()
 
