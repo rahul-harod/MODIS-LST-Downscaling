@@ -212,17 +212,17 @@ def load_model_XGBoost(model_name,selected_lst_type):
     best_model.load_model(model_dir + "18_XGBoost_"+selected_lst_type+"_LST_200.json")
     
 def Predictions_XGBoost(modisWithClosestLandsat,date_str,selected_lst_type,selected_model):
-    bands_ANN=['MODIS_LST', 'sur_refl_b07', 'NDVI', 'NDBI', 'NDWI', 'Elevation']
+    bands_XGB=['MODIS_LST', 'sur_refl_b07', 'NDVI', 'NDBI', 'NDWI', 'Elevation']
 
     data = modisWithClosestLandsat.wx.to_xarray(scale=100, crs='EPSG:4326')
     df = data.to_dataframe()
     df.reset_index(inplace=True)
     df.drop(columns=['spatial_ref'], inplace=True)
-    df1 = df[bands_ANN]
+    df1 = df[bands_XGB]
     df1.dropna(inplace=True)
     
     load_model_XGBoost(selected_model,selected_lst_type)
-    df1['XGBoost_LST'] = best_model.predict(X_test)
+    df1['XGBoost_LST'] = best_model.predict(df1)
 
     merged_df = df.merge(df1['XGBoost_LST'], how='left', left_index=True, right_index=True)
     merged_df.set_index(['y', 'x'], inplace=True)
