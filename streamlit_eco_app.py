@@ -15,6 +15,7 @@ import streamlit as st
 from google.oauth2 import service_account
 from ee import oauth
 import resnet
+import xgboost as xgb
 
 def add_logo():
     st.sidebar.image("iitb_logo.png", width=200)
@@ -204,6 +205,67 @@ def Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_
     pass
 
 
+def load_model_XGBoost(model_name,selected_lst_type):
+    global best_model
+    model_dir = f"Models/{model_name}/"
+    best_model = xgb.XGBRegressor()
+    best_model.load_model(model_dir + "18_XGBoost_"+selected_lst_type+"_LST_200.json")
+    
+def Predictions_XGBoost(modisWithClosestLandsat,date_str,selected_lst_type,selected_model):
+    bands_ANN=['MODIS_LST', 'sur_refl_b07', 'NDVI', 'NDBI', 'NDWI', 'Elevation']
+
+    data = modisWithClosestLandsat.wx.to_xarray(scale=100, crs='EPSG:4326')
+    df = data.to_dataframe()
+    df.reset_index(inplace=True)
+    df.drop(columns=['spatial_ref'], inplace=True)
+    df1 = df[bands_ANN]
+    df1.dropna(inplace=True)
+    
+    load_model_XGBoost(model_name,selected_lst_type)
+    df1['XGBoost_LST'] = best_model.predict(X_test)
+
+    merged_df = df.merge(df1['XGBoost_LST'], how='left', left_index=True, right_index=True)
+    merged_df.set_index(['y', 'x'], inplace=True)
+    merged_df = merged_df.to_xarray()
+    data['XGBoost_LST'] = merged_df['XGBoost_LST']
+    data['XGBoost_LST'].attrs = {'long_name': 'XGBoost LST (K)', 'AREA_OR_POINT': 'Area', 'grid_mapping': 'spatial_ref'}
+    data['Original_MODIS_LST'].attrs = {'long_name': 'MODIS LST (K)', 'AREA_OR_POINT': 'Area', 'grid_mapping': 'spatial_ref'}
+    
+    # Plot multiple images in subplots
+    min_1 = np.nanpercentile(df1['XGBoost_LST'], 1)
+    max_1 = np.nanpercentile(df1['XGBoost_LST'], 99)
+
+    min_2 = np.nanpercentile(df1['MODIS_LST'], 1)
+    max_2 = np.nanpercentile(df1['MODIS_LST'], 99)
+
+    min_ = min(min_1, min_2)
+    max_ = max(max_1, max_2)
+    
+    fig, (ax1, ax2,cax) = plt.subplots(ncols=3 ,figsize=(8, 3.5),gridspec_kw={"width_ratios":[1,1,0.05]})
+    # fig.subplots_adjust(wspace=0.1)
+    im1 = data['Original_MODIS_LST'].plot(ax=ax1, cmap='jet', vmin=min_, vmax=max_,add_colorbar=False)
+    im2 = data['XGBoost_LST'].plot(ax=ax2, cmap='jet', vmin=min_, vmax=max_,add_colorbar=False)
+    
+    ax1.set_title('MODIS LST')
+    ax2.set_title('XGBoost LST')
+    ip = InsetPosition(ax2, [1.05,0,0.05,1]) 
+    cax.set_axes_locator(ip)
+    cbar=fig.colorbar(im2, cax=cax, ax=[ax1,ax2])
+    cbar.set_label('LST in Kelvin', size=12)
+
+    for ax in (ax1, ax2):
+        # ax.set_xticks([])
+        # ax.set_yticks([])
+        ax.set_xlabel('')
+        ax.set_ylabel('')
+        plt.tight_layout()
+    
+    # Convert the plot to an image for displaying in Streamlit
+    st.pyplot(fig)
+    st.markdown(get_nc_download_link(data[['Original_MODIS_LST','XGBoost_LST']],file_name=selected_lst_type+'_Downscaled_LST_'+date_str+'_'+selected_model+'.nc'), unsafe_allow_html=True)
+    st.markdown(get_png_download_link(fig, file_name=selected_lst_type+'_Downscaled_LST_Map_'+date_str+'_'+selected_model+'.png'), unsafe_allow_html=True)
+    pass
+
 def user_input_map(lat, lon, buffer_size, date):
     try:
         date_str = date.strftime('%Y-%m-%d')
@@ -241,7 +303,7 @@ def main():
     lst_types = ['Aqua_day', 'Aqua_night', 'Terra_day', 'Terra_night']
     selected_lst_type = st.sidebar.selectbox("Select LST Type", lst_types, index=lst_types.index(selected_lst_type))
 
-    Model_types = ['ANN' ,'ResNet']
+    Model_types = ['ANN' ,'XGBoost']
     selected_model = st.sidebar.selectbox("Select Model", Model_types, index=Model_types.index(selected_model))
 
     # Update variables based on the selected LST type
@@ -256,8 +318,8 @@ def main():
         if selected_model in ['ANN']:
             Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_model)
             
-        # if selected_model in ['ResNet_SMWA', 'ResNet_L2']:
-        #     Predictions_ResNet(modisWithClosestLandsat,date_str,selected_lst_type,selected_model)
+        if selected_model in ['XGBoost']:
+            Predictions_XGBoost(modisWithClosestLandsat,date_str,selected_lst_type,selected_model)
             
         st.sidebar.success("Code execution completed successfully!")
 
