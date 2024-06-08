@@ -152,7 +152,7 @@ def load_model_and_scaler_ANN(model_name,selected_lst_type):
     best_model = model_from_json(loaded_model_json)
     best_model.load_weights(model_dir + "152_ANN_Weights_"+selected_lst_type+".h5")
 
-def Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_model):
+def Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_model,map):
     bands_ANN=['MODIS_LST', 'sur_refl_b07', 'NDVI', 'NDBI', 'NDWI', 'Elevation']
 
     data = modisWithClosestLandsat.wx.to_xarray(scale=100, crs='EPSG:4326')
@@ -173,7 +173,8 @@ def Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_
     data['ANN_LST'] = merged_df['ANN_LST']
     data['ANN_LST'].attrs = {'long_name': 'ANN LST (K)', 'AREA_OR_POINT': 'Area', 'grid_mapping': 'spatial_ref'}
     data['Original_MODIS_LST'].attrs = {'long_name': 'MODIS LST (K)', 'AREA_OR_POINT': 'Area', 'grid_mapping': 'spatial_ref'}
-    
+    map.plot_raster(data['ANN_LST'], cmap="jet")
+
     # Plot multiple images in subplots
     min_1 = np.nanpercentile(df1['ANN_LST'], 1)
     max_1 = np.nanpercentile(df1['ANN_LST'], 99)
@@ -216,7 +217,7 @@ def load_model_XGBoost(model_name,selected_lst_type):
     best_model = xgb.XGBRegressor()
     best_model.load_model(model_dir + "18_XGBoost_"+selected_lst_type+"_LST_200.json")
     
-def Predictions_XGBoost(modisWithClosestLandsat,date_str,selected_lst_type,selected_model):
+def Predictions_XGBoost(modisWithClosestLandsat,date_str,selected_lst_type,selected_model,map):
     bands_XGB=['MODIS_LST', 'sur_refl_b07', 'NDVI', 'NDBI', 'NDWI', 'Elevation']
 
     data = modisWithClosestLandsat.wx.to_xarray(scale=100, crs='EPSG:4326')
@@ -306,7 +307,7 @@ def user_input_map(lat, lon, buffer_size, date):
         m.centerObject(clip_roi, 10)
         m.to_streamlit(height=450)
         
-        return point, clip_roi, date_str
+        return point, clip_roi, date_str,m
     except Exception as e:
         st.error(f"An error occurred: {str(e)}")
         return None, None, None
@@ -333,14 +334,14 @@ def main():
     LST_band=lst_paths[selected_lst_type]['LST_band']
     # Run the code when the user clicks the button
     if st.sidebar.button("Submit"):
-        point,clip_roi,date_str=user_input_map(lat, lon, radius, date_input)
+        point,clip_roi,date_str,map=user_input_map(lat, lon, radius, date_input)
         st.write(selected_lst_type+': '+selected_model)
         modisWithClosestLandsat = downscale(date_str,point, clip_roi, Modis, MODIS_Ref_500,LST_band)
         if selected_model in ['ANN']:
-            Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_model)
+            Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_model,map)
 
         if selected_model in ['XGBoost']:
-            Predictions_XGBoost(modisWithClosestLandsat,date_str,selected_lst_type,selected_model)
+            Predictions_XGBoost(modisWithClosestLandsat,date_str,selected_lst_type,selected_model,map)
 
         st.sidebar.success("Code execution completed successfully!")
 
