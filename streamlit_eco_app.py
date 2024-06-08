@@ -221,7 +221,7 @@ def Predictions_XGBoost(modisWithClosestLandsat,date_str,selected_lst_type,selec
     df1 = df[bands_ANN]
     df1.dropna(inplace=True)
     
-    load_model_XGBoost(model_name,selected_lst_type)
+    load_model_XGBoost(selected_model,selected_lst_type)
     df1['XGBoost_LST'] = best_model.predict(X_test)
 
     merged_df = df.merge(df1['XGBoost_LST'], how='left', left_index=True, right_index=True)
