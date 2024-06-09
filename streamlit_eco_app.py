@@ -175,7 +175,8 @@ def plot_xarray_on_folium(ds, variable,min,max,clip_roi, colormap='jet', zoom_st
     m = geemap.Map()
     url = 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}'
     m.add_tile_layer(url, name='Google Map', attribution='Google')
-    m.centerObject(clip_roi, 12)
+    m.addLayer(ee.FeatureCollection(clip_roi).style(**style), {}, 'roi')
+    m.centerObject(clip_roi, 11)
     
     
     # Add the image overlay to the map
@@ -356,7 +357,7 @@ def user_input_map(lat, lon, buffer_size, date):
         m.add_tile_layer(url, name='Google Map', attribution='Google')
         
         m.addLayer(ee.FeatureCollection(clip_roi).style(**style), {}, 'roi')
-        m.centerObject(clip_roi, 10)
+        m.centerObject(clip_roi, 11)
         m.to_streamlit(height=450)
         
         return point, clip_roi, date_str
