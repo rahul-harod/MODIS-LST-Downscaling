@@ -23,7 +23,7 @@ from folium import plugins
 import geemap.foliumap as geemap
 from typing import Optional, Callable
 
-final_res=100
+final_res=30
 st.set_page_config(layout="wide")
 
 def add_logo():
@@ -42,7 +42,7 @@ get_auth()
 
 
 selected_model='ANN'
-selected_lst_type = 'Terra_day'
+selected_lst_type = 'Aqua_day'
 
 targetProjection = ee.Projection('EPSG:32643')
 ERA5 = ee.ImageCollection("ECMWF/ERA5_LAND/HOURLY")
@@ -368,10 +368,10 @@ def user_input_map(lat, lon, buffer_size, date):
 def main():
     global selected_lst_type,Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5,ERA_hour,LST_band,selected_model,final_res
     st.sidebar.title("Enter Search Criteria")
-    lat = st.sidebar.number_input("Latitude", value=23.15)
-    lon = st.sidebar.number_input("Longitude", value=88.40)
-    radius = st.sidebar.number_input("Square Buffer distance (m)", value=20000)
-    date_input = st.sidebar.date_input("Date", value=pd.Timestamp('2024-02-29'))
+    lat = st.sidebar.number_input("Latitude", value=30.72)
+    lon = st.sidebar.number_input("Longitude", value=76.78)
+    radius = st.sidebar.number_input("Square Buffer distance (m)", value=8000)
+    date_input = st.sidebar.date_input("Date", value=pd.Timestamp('2024-03-14'))
     
 
     lst_types = ['Aqua_day', 'Aqua_night', 'Terra_day', 'Terra_night']
