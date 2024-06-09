@@ -22,6 +22,7 @@ import folium
 import geemap.foliumap as geemap
 from typing import Optional, Callable
 
+final_res=30
 st.set_page_config(layout="wide")
 
 def add_logo():
@@ -72,7 +73,7 @@ lst_paths = {
 }
 
 def Upscale(img):
-    return img.reduceResolution(reducer=ee.Reducer.mean(), maxPixels=1024).reproject(crs=targetProjection, scale=100)
+    return img.reduceResolution(reducer=ee.Reducer.mean(), maxPixels=1024).reproject(crs=targetProjection, scale=final_res)
 
 def addBandsToModis(img,LST_band):
     thermalBands = img.select(LST_band).multiply(0.02).rename('MODIS_LST')
@@ -81,7 +82,7 @@ def addBandsToModis(img,LST_band):
 
 def downsampledMODIS_LST(img,clip_roi):
     original_lst=img.select('MODIS_LST').rename('Original_MODIS_LST')
-    return img.resample('bilinear').reproject(crs=targetProjection, scale=100).addBands(original_lst).clip(clip_roi)
+    return img.resample('bilinear').reproject(crs=targetProjection, scale=final_res).addBands(original_lst).clip(clip_roi)
     
 def calculateTimeDifference(modisImage, landsatImage):
     modisDate = modisImage.date()
@@ -122,7 +123,7 @@ def downscale(date,point, clip_roi, Modis, MODIS_Ref_500,LST_band):
     start = ee.Date(date)
     end = start.advance(1,'day')
 
-    landsat = Landsat_S2_data.Harmonized_LS(start,clip_roi)
+    landsat = Landsat_S2_data.Harmonized_LS(start,clip_roi,scale=final_res)
     Modis = Modis.filterDate(start, end).select(LST_band)
     MODIS_Ref_500 = MODIS_Ref_500.filterDate(start, end).select(['sur_refl_b07'])
     Modis = Modis.combine(MODIS_Ref_500).first()
