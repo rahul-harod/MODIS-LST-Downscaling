@@ -188,8 +188,8 @@ def plot_xarray_on_folium(ds, variable,min,max,clip_roi, colormap='jet', zoom_st
         colormap=cm,
         opacity=0.7
     ).add_to(m)
-    m.add_child(folium.LayerControl())
-    m.add_child(cm)
+    # m.add_child(folium.LayerControl())
+    # m.add_child(cm)
     
     # Add fullscreen button
     plugins.Fullscreen().add_to(m)
