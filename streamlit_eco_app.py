@@ -3,7 +3,9 @@ import base64
 import ee
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.cm
 from mpl_toolkits.axes_grid1.inset_locator import InsetPosition
+import rioxarray
 import pandas as pd
 import os
 import joblib
@@ -17,7 +19,7 @@ from ee import oauth
 import resnet
 import xgboost as xgb
 from streamlit_folium import folium_static
-import geemap as gee
+import folium
 import geemap.foliumap as geemap
 from typing import Optional, Callable
 
@@ -153,6 +155,28 @@ def load_model_and_scaler_ANN(model_name,selected_lst_type):
     best_model = model_from_json(loaded_model_json)
     best_model.load_weights(model_dir + "152_ANN_Weights_"+selected_lst_type+".h5")
 
+def plot_xarray_on_folium(ds, variable,min,max,map):
+    # Extract data
+    data = ds[variable].values.astype(np.float64)
+    lat = ds['y'].values.astype(np.float64)
+    lon = ds['x'].values.astype(np.float64)
+    
+    # Normalize data for colormap
+    normed_data = (data - min) / (max - min)
+    cm = matplotlib.cm.get_cmap('jet')
+    colored_data = cm(normed_data)
+    
+    # Flip the data to match Folium's expectations
+    colored_data = np.flipud(colored_data)
+    # Add the image overlay to the map
+    folium.raster_layers.ImageOverlay(
+        colored_data,
+        bounds=[[lat.min(), lon.min()], [lat.max(), lon.max()]],
+        mercator_project=True,
+        opacity=0.5
+    ).add_to(map)
+    return map
+    
 def Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_model,map):
     bands_ANN=['MODIS_LST', 'sur_refl_b07', 'NDVI', 'NDBI', 'NDWI', 'Elevation']
 
@@ -210,9 +234,7 @@ def Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_
     st.markdown(get_nc_download_link(data[['Original_MODIS_LST','ANN_LST']],file_name=selected_lst_type+'_Downscaled_LST_'+date_str+'_'+selected_model+'.nc'), unsafe_allow_html=True)
     st.markdown(get_png_download_link(fig, file_name=selected_lst_type+'_Downscaled_LST_Map_'+date_str+'_'+selected_model+'.png'), unsafe_allow_html=True)
     
-    out_cog = "ndvi.tif"
-    out_cog1=gee.numpy_to_cog(data['ANN_LST'].values,out_cog)
-    map.add_raster(out_cog1, cmap='jet', vmin=min_, vmax=max_, layer_name="ANN_LST")
+    plot_xarray_on_folium(data, 'ANN_LST',min_,max_,map)
 
     
     pass
@@ -277,6 +299,8 @@ def Predictions_XGBoost(modisWithClosestLandsat,date_str,selected_lst_type,selec
     st.pyplot(fig)
     st.markdown(get_nc_download_link(data[['Original_MODIS_LST','XGBoost_LST']],file_name=selected_lst_type+'_Downscaled_LST_'+date_str+'_'+selected_model+'.nc'), unsafe_allow_html=True)
     st.markdown(get_png_download_link(fig, file_name=selected_lst_type+'_Downscaled_LST_Map_'+date_str+'_'+selected_model+'.png'), unsafe_allow_html=True)
+    
+    plot_xarray_on_folium(data, 'XGBoost_LST',min_,max_,map)
     pass
 
 # def display_map(lat, lon, zoom=10):
