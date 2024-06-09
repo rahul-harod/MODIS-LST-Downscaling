@@ -179,11 +179,9 @@ def plot_xarray_on_folium(ds, variable,min,max,map, colormap='jet', zoom_start=1
         # mercator_project=True,
         opacity=0.6
     ).add_to(map)
+        
     
-    return map
-    
-    
-def Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_model,map):
+def Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_model,map_obj):
     bands_ANN=['MODIS_LST', 'sur_refl_b07', 'NDVI', 'NDBI', 'NDWI', 'Elevation']
 
     data = modisWithClosestLandsat.wx.to_xarray(scale=100, crs='EPSG:4326')
@@ -241,8 +239,8 @@ def Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_
     st.markdown(get_png_download_link(fig, file_name=selected_lst_type+'_Downscaled_LST_Map_'+date_str+'_'+selected_model+'.png'), unsafe_allow_html=True)
     
     
-    map=plot_xarray_on_folium(data, 'ANN_LST',min_,max_,map)
-    folium_static(map)
+    plot_xarray_on_folium(data, 'ANN_LST',min_,max_,map_obj)
+    folium_static(map_obj)  
     pass
 
 
@@ -306,8 +304,9 @@ def Predictions_XGBoost(modisWithClosestLandsat,date_str,selected_lst_type,selec
     st.markdown(get_nc_download_link(data[['Original_MODIS_LST','XGBoost_LST']],file_name=selected_lst_type+'_Downscaled_LST_'+date_str+'_'+selected_model+'.nc'), unsafe_allow_html=True)
     st.markdown(get_png_download_link(fig, file_name=selected_lst_type+'_Downscaled_LST_Map_'+date_str+'_'+selected_model+'.png'), unsafe_allow_html=True)
     
-    map=plot_xarray_on_folium(data, 'XGBoost_LST',min_,max_,map)
-    folium_static(map)
+    plot_xarray_on_folium(data, 'XGBoost_LST',min_,max_,map_obj)
+    folium_static(map_obj)    
+    
     pass
 
 # def display_map(lat, lon, zoom=10):
@@ -372,8 +371,8 @@ def main():
     LST_band=lst_paths[selected_lst_type]['LST_band']
     # Run the code when the user clicks the button
     if st.sidebar.button("Submit"):
-        point,clip_roi,date_str,map=user_input_map(lat, lon, radius, date_input)
-        folium_static(map)
+        point,clip_roi,date_str,map_obj=user_input_map(lat, lon, radius, date_input)
+        folium_static(map_obj)
         st.write(selected_lst_type+': '+selected_model)
         modisWithClosestLandsat = downscale(date_str,point, clip_roi, Modis, MODIS_Ref_500,LST_band)
         if selected_model in ['ANN']:
