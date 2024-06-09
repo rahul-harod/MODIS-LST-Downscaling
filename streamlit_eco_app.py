@@ -123,7 +123,7 @@ def downscale(date,point, clip_roi, Modis, MODIS_Ref_500,LST_band):
     start = ee.Date(date)
     end = start.advance(1,'day')
 
-    landsat = Landsat_S2_data.Harmonized_LS(start,clip_roi,scale=final_res)
+    landsat = Landsat_S2_data.Harmonized_LS(start,clip_roi)
     Modis = Modis.filterDate(start, end).select(LST_band)
     MODIS_Ref_500 = MODIS_Ref_500.filterDate(start, end).select(['sur_refl_b07'])
     Modis = Modis.combine(MODIS_Ref_500).first()
