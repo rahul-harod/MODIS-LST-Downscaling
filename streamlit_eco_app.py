@@ -22,7 +22,7 @@ import folium
 import geemap.foliumap as geemap
 from typing import Optional, Callable
 
-final_res=30
+final_res=100
 st.set_page_config(layout="wide")
 
 def add_logo():
@@ -366,6 +366,9 @@ def main():
 
     Model_types = ['ANN' ,'XGBoost']
     selected_model = st.sidebar.selectbox("Select Model", Model_types, index=Model_types.index(selected_model))
+
+    res_types=[30,100]
+    final_res= st.sidebar.selectbox("Downscale Resolution", res_types, index=res_types.index(final_res))
 
     # Update variables based on the selected LST type
     Modis = ee.ImageCollection(lst_paths[selected_lst_type]['Modis'])
