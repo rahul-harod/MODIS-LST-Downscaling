@@ -242,7 +242,7 @@ def Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_
     
     
     plot_xarray_on_folium(data, 'ANN_LST',min_,max_,map_obj)
-    folium_static(map_obj)  
+    map_obj.to_streamlit(height=450)
     pass
 
 
@@ -307,7 +307,7 @@ def Predictions_XGBoost(modisWithClosestLandsat,date_str,selected_lst_type,selec
     st.markdown(get_png_download_link(fig, file_name=selected_lst_type+'_Downscaled_LST_Map_'+date_str+'_'+selected_model+'.png'), unsafe_allow_html=True)
     
     plot_xarray_on_folium(data, 'XGBoost_LST',min_,max_,map_obj)
-    folium_static(map_obj)    
+    map_obj.to_streamlit(height=450)   
     
     pass
 
@@ -344,7 +344,7 @@ def user_input_map(lat, lon, buffer_size, date):
         
         m.addLayer(ee.FeatureCollection(clip_roi).style(**style), {}, 'roi')
         m.centerObject(clip_roi, 10)
-        # m.to_streamlit(height=450)
+        m.to_streamlit(height=450)
         
         return point, clip_roi, date_str,m
     except Exception as e:
@@ -377,7 +377,7 @@ def main():
     # Run the code when the user clicks the button
     if st.sidebar.button("Submit"):
         point,clip_roi,date_str,map_obj=user_input_map(lat, lon, radius, date_input)
-        folium_static(map_obj)
+        # folium_static(map_obj)
         st.write(selected_lst_type+': '+selected_model)
         modisWithClosestLandsat = downscale(date_str,point, clip_roi, Modis, MODIS_Ref_500,LST_band)
         if selected_model in ['ANN']:
