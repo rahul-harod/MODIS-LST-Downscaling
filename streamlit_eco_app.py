@@ -155,7 +155,7 @@ def load_model_and_scaler_ANN(model_name,selected_lst_type):
     best_model.load_weights(model_dir + "152_ANN_Weights_"+selected_lst_type+".h5")
 
 
-def plot_xarray_on_folium(ds, variable,min,max,map, colormap='jet', zoom_start=10):
+def plot_xarray_on_folium(ds, variable,min,max,m, colormap='jet', zoom_start=10):
     # Extract data
     data = ds[variable].values.astype(np.float64)
     lat = ds['y'].values.astype(np.float64)
@@ -178,7 +178,7 @@ def plot_xarray_on_folium(ds, variable,min,max,map, colormap='jet', zoom_start=1
         bounds=[[lat.min(), lon.min()], [lat.max(), lon.max()]],
         # mercator_project=True,
         opacity=0.6
-    ).add_to(map)
+    ).add_to(m)
         
     
 def Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_model,map_obj):
