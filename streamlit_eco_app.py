@@ -19,6 +19,7 @@ import resnet
 import xgboost as xgb
 from streamlit_folium import folium_static
 import folium
+from folium import plugins
 import geemap.foliumap as geemap
 from typing import Optional, Callable
 
@@ -179,13 +180,19 @@ def plot_xarray_on_folium(ds, variable,min,max,clip_roi, colormap='jet', zoom_st
     
     # Add the image overlay to the map
     folium.raster_layers.ImageOverlay(
-        colored_data,
+        name='Downscaled LST',
+        image=colored_data,
         bounds=[[lat.min(), lon.min()], [lat.max(), lon.max()]],
         # mercator_project=True,
+        interactive=True,
+        colormap=cm,
         opacity=0.7
     ).add_to(m)
-    # Add layer control
-    folium.LayerControl().add_to(m)
+    m.add_child(folium.LayerControl())
+    m.add_child(cm)
+    
+    # Add fullscreen button
+    plugins.Fullscreen().add_to(m)
     m.to_streamlit(height=450)
 
     
