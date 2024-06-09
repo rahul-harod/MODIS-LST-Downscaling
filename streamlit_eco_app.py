@@ -156,7 +156,7 @@ def load_model_and_scaler_ANN(model_name,selected_lst_type):
     best_model.load_weights(model_dir + "152_ANN_Weights_"+selected_lst_type+".h5")
 
 
-def plot_xarray_on_folium(ds, variable,min,max,m, colormap='jet', zoom_start=10):
+def plot_xarray_on_folium(ds, variable,min,max,clip_roi, colormap='jet', zoom_start=10):
     # Extract data
     data = ds[variable].values.astype(np.float64)
     lat = ds['y'].values.astype(np.float64)
@@ -171,19 +171,30 @@ def plot_xarray_on_folium(ds, variable,min,max,m, colormap='jet', zoom_start=10)
     # colored_data = np.flipud(colored_data)
     
     # Create a Folium map 
-    # m = geemap.Map(location=[lat.mean(), lon.mean()], zoom_start=zoom_start)
+    m = geemap.Map()
+    url = 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}'
+    m.add_tile_layer(url, name='Google Map', attribution='Google')
+    m.centerObject(clip_roi, 12)
+    
     
     # Add the image overlay to the map
     folium.raster_layers.ImageOverlay(
         colored_data,
         bounds=[[lat.min(), lon.min()], [lat.max(), lon.max()]],
         # mercator_project=True,
-        opacity=0.6
+        opacity=0.7
     ).add_to(m)
-    # return m
-        
+    # Add layer control
+    folium.LayerControl().add_to(m)
+
+    # Add opacity control
+    st.slider('Adjust Overlay Opacity', 0.0, 1.0, 0.7, step=0.01, key='opacity', on_change=lambda: image_overlay.options.update(opacity=st.session_state.opacity))
+
+    # Render the map in Streamlit
+    folium_static(m)
+            
     
-def Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_model,map_obj):
+def Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_model,clip_roi):
     bands_ANN=['MODIS_LST', 'sur_refl_b07', 'NDVI', 'NDBI', 'NDWI', 'Elevation']
 
     data = modisWithClosestLandsat.wx.to_xarray(scale=final_res, crs='EPSG:4326')
@@ -241,8 +252,8 @@ def Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_
     st.markdown(get_png_download_link(fig, file_name=selected_lst_type+'_Downscaled_LST_Map_'+date_str+'_'+selected_model+'.png'), unsafe_allow_html=True)
     
     
-    plot_xarray_on_folium(data, 'ANN_LST',min_,max_,map_obj)
-    map_obj.to_streamlit(height=450)
+    plot_xarray_on_folium(data, 'ANN_LST',min_,max_,clip_roi)
+    # map_obj.to_streamlit(height=450)
     pass
 
 
@@ -252,7 +263,7 @@ def load_model_XGBoost(model_name,selected_lst_type):
     best_model = xgb.XGBRegressor()
     best_model.load_model(model_dir + "18_XGBoost_"+selected_lst_type+"_LST_200.json")
     
-def Predictions_XGBoost(modisWithClosestLandsat,date_str,selected_lst_type,selected_model,map_obj):
+def Predictions_XGBoost(modisWithClosestLandsat,date_str,selected_lst_type,selected_model,clip_roi):
     bands_XGB=['MODIS_LST', 'sur_refl_b07', 'NDVI', 'NDBI', 'NDWI', 'Elevation']
 
     data = modisWithClosestLandsat.wx.to_xarray(scale=final_res, crs='EPSG:4326')
@@ -306,8 +317,8 @@ def Predictions_XGBoost(modisWithClosestLandsat,date_str,selected_lst_type,selec
     st.markdown(get_nc_download_link(data[['Original_MODIS_LST','XGBoost_LST']],file_name=selected_lst_type+'_Downscaled_LST_'+date_str+'_'+selected_model+'.nc'), unsafe_allow_html=True)
     st.markdown(get_png_download_link(fig, file_name=selected_lst_type+'_Downscaled_LST_Map_'+date_str+'_'+selected_model+'.png'), unsafe_allow_html=True)
     
-    plot_xarray_on_folium(data, 'XGBoost_LST',min_,max_,map_obj)
-    map_obj.to_streamlit(height=450)   
+    plot_xarray_on_folium(data, 'XGBoost_LST',min_,max_,clip_roi)
+    # map_obj.to_streamlit(height=450)   
     
     pass
 
@@ -346,7 +357,7 @@ def user_input_map(lat, lon, buffer_size, date):
         m.centerObject(clip_roi, 10)
         m.to_streamlit(height=450)
         
-        return point, clip_roi, date_str,m
+        return point, clip_roi, date_str
     except Exception as e:
         st.error(f"An error occurred: {str(e)}")
         return None, None, None
@@ -376,15 +387,14 @@ def main():
     LST_band=lst_paths[selected_lst_type]['LST_band']
     # Run the code when the user clicks the button
     if st.sidebar.button("Submit"):
-        point,clip_roi,date_str,map_obj=user_input_map(lat, lon, radius, date_input)
-        # folium_static(map_obj)
+        point,clip_roi,date_str=user_input_map(lat, lon, radius, date_input)
         st.write(selected_lst_type+': '+selected_model)
         modisWithClosestLandsat = downscale(date_str,point, clip_roi, Modis, MODIS_Ref_500,LST_band)
         if selected_model in ['ANN']:
-            Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_model,map_obj)
+            Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_model,clip_roi)
 
         if selected_model in ['XGBoost']:
-            Predictions_XGBoost(modisWithClosestLandsat,date_str,selected_lst_type,selected_model,map_obj)
+            Predictions_XGBoost(modisWithClosestLandsat,date_str,selected_lst_type,selected_model,clip_roi)
 
         st.sidebar.success("Code execution completed successfully!")
 
