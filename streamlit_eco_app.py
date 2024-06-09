@@ -3,7 +3,6 @@ import base64
 import ee
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.cm
 from mpl_toolkits.axes_grid1.inset_locator import InsetPosition
 import rioxarray
 import pandas as pd
@@ -163,7 +162,7 @@ def plot_xarray_on_folium(ds, variable,min,max,map):
     
     # Normalize data for colormap
     normed_data = (data - min) / (max - min)
-    cm = matplotlib.cm.get_cmap('jet')
+    cm = plt.get_cmap('jet')
     colored_data = cm(normed_data)
     
     # Flip the data to match Folium's expectations
