@@ -186,7 +186,7 @@ def plot_xarray_on_folium(ds, variable,min,max,m, colormap='jet', zoom_start=10)
 def Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_model,map_obj):
     bands_ANN=['MODIS_LST', 'sur_refl_b07', 'NDVI', 'NDBI', 'NDWI', 'Elevation']
 
-    data = modisWithClosestLandsat.wx.to_xarray(scale=100, crs='EPSG:4326')
+    data = modisWithClosestLandsat.wx.to_xarray(scale=final_res, crs='EPSG:4326')
     df = data.to_dataframe()
     df.reset_index(inplace=True)
     df.drop(columns=['spatial_ref'], inplace=True)
@@ -255,7 +255,7 @@ def load_model_XGBoost(model_name,selected_lst_type):
 def Predictions_XGBoost(modisWithClosestLandsat,date_str,selected_lst_type,selected_model,map_obj):
     bands_XGB=['MODIS_LST', 'sur_refl_b07', 'NDVI', 'NDBI', 'NDWI', 'Elevation']
 
-    data = modisWithClosestLandsat.wx.to_xarray(scale=100, crs='EPSG:4326')
+    data = modisWithClosestLandsat.wx.to_xarray(scale=final_res, crs='EPSG:4326')
     df = data.to_dataframe()
     df.reset_index(inplace=True)
     df.drop(columns=['spatial_ref'], inplace=True)
