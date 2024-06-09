@@ -179,6 +179,7 @@ def plot_xarray_on_folium(ds, variable,min,max,m, colormap='jet', zoom_start=10)
         # mercator_project=True,
         opacity=0.6
     ).add_to(m)
+    return m
         
     
 def Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_model,map_obj):
