@@ -206,6 +206,9 @@ def Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_
     df.drop(columns=['spatial_ref'], inplace=True)
     df1 = df[bands_ANN]
     df1.dropna(inplace=True)
+    if len(df1) < 50:
+        st.write("No data available")
+        return
     
     load_model_and_scaler_ANN(selected_model,selected_lst_type)
     X_test = scaler_X.transform(df1[bands_ANN])
@@ -275,6 +278,9 @@ def Predictions_XGBoost(modisWithClosestLandsat,date_str,selected_lst_type,selec
     df.drop(columns=['spatial_ref'], inplace=True)
     df1 = df[bands_XGB]
     df1.dropna(inplace=True)
+    if len(df1) < 50:
+        st.write("No data available")
+        return
     
     load_model_XGBoost(selected_model,selected_lst_type)
     df1['XGBoost_LST'] = best_model.predict(df1)
