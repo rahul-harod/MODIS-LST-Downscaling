@@ -154,7 +154,8 @@ def load_model_and_scaler_ANN(model_name,selected_lst_type):
     best_model = model_from_json(loaded_model_json)
     best_model.load_weights(model_dir + "152_ANN_Weights_"+selected_lst_type+".h5")
 
-def plot_xarray_on_folium(ds, variable,min,max,map):
+
+def plot_xarray_on_folium(ds, variable,,min,max,map, colormap='jet', zoom_start=10):
     # Extract data
     data = ds[variable].values.astype(np.float64)
     lat = ds['y'].values.astype(np.float64)
@@ -162,18 +163,24 @@ def plot_xarray_on_folium(ds, variable,min,max,map):
     
     # Normalize data for colormap
     normed_data = (data - min) / (max - min)
-    cm = plt.get_cmap('jet')
+    cm = plt.get_cmap(colormap)
     colored_data = cm(normed_data)
     
     # Flip the data to match Folium's expectations
     colored_data = np.flipud(colored_data)
+    
+    # Create a Folium map 
+    # m = geemap.Map(location=[lat.mean(), lon.mean()], zoom_start=zoom_start)
+    
     # Add the image overlay to the map
     folium.raster_layers.ImageOverlay(
         colored_data,
         bounds=[[lat.min(), lon.min()], [lat.max(), lon.max()]],
         # mercator_project=True,
-        opacity=0.5
+        opacity=0.6
     ).add_to(map)
+    
+    return map
     
     
 def Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_model,map):
@@ -233,7 +240,9 @@ def Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_
     st.markdown(get_nc_download_link(data[['Original_MODIS_LST','ANN_LST']],file_name=selected_lst_type+'_Downscaled_LST_'+date_str+'_'+selected_model+'.nc'), unsafe_allow_html=True)
     st.markdown(get_png_download_link(fig, file_name=selected_lst_type+'_Downscaled_LST_Map_'+date_str+'_'+selected_model+'.png'), unsafe_allow_html=True)
     
-    plot_xarray_on_folium(data, 'ANN_LST',min_,max_,map)
+    
+    map=plot_xarray_on_folium(data, 'XGBoost_LST',min_,max_,map)
+    map.to_streamlit(height=450)
     pass
 
 
@@ -297,7 +306,8 @@ def Predictions_XGBoost(modisWithClosestLandsat,date_str,selected_lst_type,selec
     st.markdown(get_nc_download_link(data[['Original_MODIS_LST','XGBoost_LST']],file_name=selected_lst_type+'_Downscaled_LST_'+date_str+'_'+selected_model+'.nc'), unsafe_allow_html=True)
     st.markdown(get_png_download_link(fig, file_name=selected_lst_type+'_Downscaled_LST_Map_'+date_str+'_'+selected_model+'.png'), unsafe_allow_html=True)
     
-    plot_xarray_on_folium(data, 'XGBoost_LST',min_,max_,map)
+    map=plot_xarray_on_folium(data, 'XGBoost_LST',min_,max_,map)
+    map.to_streamlit(height=450)
     pass
 
 # def display_map(lat, lon, zoom=10):
