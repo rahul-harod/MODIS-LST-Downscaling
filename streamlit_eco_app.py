@@ -168,7 +168,7 @@ def plot_xarray_on_folium(ds, variable,min,max,m, colormap='jet', zoom_start=10)
     colored_data = cm(normed_data)
     
     # Flip the data to match Folium's expectations
-    colored_data = np.flipud(colored_data)
+    # colored_data = np.flipud(colored_data)
     
     # Create a Folium map 
     # m = geemap.Map(location=[lat.mean(), lon.mean()], zoom_start=zoom_start)
