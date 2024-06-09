@@ -178,7 +178,7 @@ def plot_xarray_on_folium(ds, variable,min,max,m, colormap='jet', zoom_start=10)
         bounds=[[lat.min(), lon.min()], [lat.max(), lon.max()]],
         # mercator_project=True,
         opacity=0.6
-    ).add_to(m)
+    ).add_to(m,name=variable,index=2)
     return m
         
     
