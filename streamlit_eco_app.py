@@ -207,7 +207,7 @@ def Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_
     df1 = df[bands_ANN]
     df1.dropna(inplace=True)
     if len(df1) < 50:
-        st.write("No data available")
+        st.markdown("<span style='color:red; font-weight:bold; font-size:20px;'>No data available</span>", unsafe_allow_html=True)
         return
     
     load_model_and_scaler_ANN(selected_model,selected_lst_type)
@@ -279,7 +279,7 @@ def Predictions_XGBoost(modisWithClosestLandsat,date_str,selected_lst_type,selec
     df1 = df[bands_XGB]
     df1.dropna(inplace=True)
     if len(df1) < 50:
-        st.write("No data available")
+        st.markdown("<span style='color:red; font-weight:bold; font-size:20px;'>No data available</span>", unsafe_allow_html=True)
         return
     
     load_model_XGBoost(selected_model,selected_lst_type)
