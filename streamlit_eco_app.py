@@ -183,7 +183,7 @@ def plot_xarray_on_folium(ds, variable,min,max,m, colormap='jet', zoom_start=10)
     return m
         
     
-def Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_model,map_obj):
+def Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_model,map):
     bands_ANN=['MODIS_LST', 'sur_refl_b07', 'NDVI', 'NDBI', 'NDWI', 'Elevation']
 
     data = modisWithClosestLandsat.wx.to_xarray(scale=100, crs='EPSG:4326')
@@ -241,8 +241,8 @@ def Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_
     st.markdown(get_png_download_link(fig, file_name=selected_lst_type+'_Downscaled_LST_Map_'+date_str+'_'+selected_model+'.png'), unsafe_allow_html=True)
     
     
-    map_obj=plot_xarray_on_folium(data, 'ANN_LST',min_,max_,map_obj)
-    folium_static(map_obj)  
+    map=plot_xarray_on_folium(data, 'ANN_LST',min_,max_,map)
+    folium_static(map)  
     pass
 
 
@@ -306,8 +306,8 @@ def Predictions_XGBoost(modisWithClosestLandsat,date_str,selected_lst_type,selec
     st.markdown(get_nc_download_link(data[['Original_MODIS_LST','XGBoost_LST']],file_name=selected_lst_type+'_Downscaled_LST_'+date_str+'_'+selected_model+'.nc'), unsafe_allow_html=True)
     st.markdown(get_png_download_link(fig, file_name=selected_lst_type+'_Downscaled_LST_Map_'+date_str+'_'+selected_model+'.png'), unsafe_allow_html=True)
     
-    map_obj=plot_xarray_on_folium(data, 'XGBoost_LST',min_,max_,map_obj)
-    folium_static(map_obj)    
+    map=plot_xarray_on_folium(data, 'XGBoost_LST',min_,max_,map)
+    folium_static(map)    
     
     pass
 
