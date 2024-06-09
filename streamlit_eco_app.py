@@ -172,7 +172,7 @@ def plot_xarray_on_folium(ds, variable,min,max,map):
     folium.raster_layers.ImageOverlay(
         colored_data,
         bounds=[[lat.min(), lon.min()], [lat.max(), lon.max()]],
-        mercator_project=True,
+        # mercator_project=True,
         opacity=0.5
     ).add_to(map)
     return map
