@@ -378,10 +378,10 @@ def main():
         st.write(selected_lst_type+': '+selected_model)
         modisWithClosestLandsat = downscale(date_str,point, clip_roi, Modis, MODIS_Ref_500,LST_band)
         if selected_model in ['ANN']:
-            Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_model,map)
+            Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_model,map_obj)
 
         if selected_model in ['XGBoost']:
-            Predictions_XGBoost(modisWithClosestLandsat,date_str,selected_lst_type,selected_model,map)
+            Predictions_XGBoost(modisWithClosestLandsat,date_str,selected_lst_type,selected_model,map_obj)
 
         st.sidebar.success("Code execution completed successfully!")
 
