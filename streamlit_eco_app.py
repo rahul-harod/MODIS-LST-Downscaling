@@ -178,7 +178,7 @@ def plot_xarray_on_folium(ds, variable,min,max,m, colormap='jet', zoom_start=10)
         bounds=[[lat.min(), lon.min()], [lat.max(), lon.max()]],
         # mercator_project=True,
         opacity=0.6
-    ).add_to(m,name=variable,index=2)
+    ).add_to(m)
     return m
         
     
@@ -240,7 +240,7 @@ def Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_
     st.markdown(get_png_download_link(fig, file_name=selected_lst_type+'_Downscaled_LST_Map_'+date_str+'_'+selected_model+'.png'), unsafe_allow_html=True)
     
     
-    plot_xarray_on_folium(data, 'ANN_LST',min_,max_,map_obj)
+    map_obj=plot_xarray_on_folium(data, 'ANN_LST',min_,max_,map_obj)
     folium_static(map_obj)  
     pass
 
@@ -305,7 +305,7 @@ def Predictions_XGBoost(modisWithClosestLandsat,date_str,selected_lst_type,selec
     st.markdown(get_nc_download_link(data[['Original_MODIS_LST','XGBoost_LST']],file_name=selected_lst_type+'_Downscaled_LST_'+date_str+'_'+selected_model+'.nc'), unsafe_allow_html=True)
     st.markdown(get_png_download_link(fig, file_name=selected_lst_type+'_Downscaled_LST_Map_'+date_str+'_'+selected_model+'.png'), unsafe_allow_html=True)
     
-    plot_xarray_on_folium(data, 'XGBoost_LST',min_,max_,map_obj)
+    map_obj=plot_xarray_on_folium(data, 'XGBoost_LST',min_,max_,map_obj)
     folium_static(map_obj)    
     
     pass
