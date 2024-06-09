@@ -186,12 +186,9 @@ def plot_xarray_on_folium(ds, variable,min,max,clip_roi, colormap='jet', zoom_st
     ).add_to(m)
     # Add layer control
     folium.LayerControl().add_to(m)
+    m.to_streamlit(height=450)
 
-    # Add opacity control
-    st.slider('Adjust Overlay Opacity', 0.0, 1.0, 0.7, step=0.01, key='opacity', on_change=lambda: image_overlay.options.update(opacity=st.session_state.opacity))
-
-    # Render the map in Streamlit
-    folium_static(m)
+    
             
     
 def Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_model,clip_roi):
