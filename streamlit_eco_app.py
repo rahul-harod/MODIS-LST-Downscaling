@@ -265,7 +265,7 @@ def Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_
 
 def load_model_XGBoost(model_name,selected_lst_type):
     global best_model
-    model_dir = f"Models/{model_name}/"
+    model_dir = f"Models/XGBoost/"
     best_model = xgb.XGBRegressor()
     best_model.load_model(model_dir + "18_XGBoost_"+selected_lst_type+"_LST_200.json")
     
@@ -308,7 +308,7 @@ def Predictions_XGBoost(modisWithClosestLandsat,date_str,selected_lst_type,selec
     im2 = data['XGBoost_LST'].plot(ax=ax2, cmap='jet', vmin=min_, vmax=max_,add_colorbar=False)
     
     ax1.set_title('MODIS LST')
-    ax2.set_title('XGBoost LST')
+    ax2.set_title('ResNet LST')
     ip = InsetPosition(ax2, [1.05,0,0.05,1]) 
     cax.set_axes_locator(ip)
     cbar=fig.colorbar(im2, cax=cax, ax=[ax1,ax2])
@@ -326,7 +326,7 @@ def Predictions_XGBoost(modisWithClosestLandsat,date_str,selected_lst_type,selec
     st.markdown(get_nc_download_link(data[['Original_MODIS_LST','XGBoost_LST']],file_name=selected_lst_type+'_Downscaled_LST_'+date_str+'_'+selected_model+'.nc'), unsafe_allow_html=True)
     st.markdown(get_png_download_link(fig, file_name=selected_lst_type+'_Downscaled_LST_Map_'+date_str+'_'+selected_model+'.png'), unsafe_allow_html=True)
     
-    plot_xarray_on_folium(data, 'XGBoost_LST',min_,max_,clip_roi)
+    plot_xarray_on_folium(data, 'ResNet_LST',min_,max_,clip_roi)
     # map_obj.to_streamlit(height=450)   
     
     pass
@@ -480,7 +480,7 @@ def main():
     lst_types = ['Aqua_day', 'Aqua_night', 'Terra_day', 'Terra_night']
     selected_lst_type = st.sidebar.selectbox("Select LST Type", lst_types, index=lst_types.index(selected_lst_type))
 
-    Model_types = ['ANN' ,'XGBoost']
+    Model_types = ['ANN' ,'ResNet']
     selected_model = st.sidebar.selectbox("Select Model", Model_types, index=Model_types.index(selected_model))
 
     res_types=[30,100]
@@ -498,7 +498,7 @@ def main():
         if selected_model in ['ANN']:
             Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_model,clip_roi)
 
-        if selected_model in ['XGBoost']:
+        if selected_model in ['ResNet']:
             Predictions_XGBoost(modisWithClosestLandsat,date_str,selected_lst_type,selected_model,clip_roi)
 
         st.sidebar.success("Code execution completed successfully!")
