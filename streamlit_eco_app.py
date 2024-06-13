@@ -31,12 +31,31 @@ def add_logo():
 
 add_logo()
 
-# Title of the app
-st.markdown("# MODIS LST Downscaling")
-
-# Your name in smaller font size
-st.markdown("<h4 style='text-align: left; color: gray;'>- Rahul Harod</h4>", unsafe_allow_html=True)
-
+# Use HTML with CSS for layout
+st.markdown(
+    """
+    <style>
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .title {
+        font-size: 2em;
+        font-weight: bold;
+    }
+    .name {
+        font-size: 1em;
+        color: gray;
+    }
+    </style>
+    <div class="header">
+        <div class="title">MODIS LST Downscaling</div>
+        <div class="name">- Rahul Harod</div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 def get_auth():
     service_account_keys=st.secrets['ee_keys']
     credentials=service_account.Credentials.from_service_account_info(service_account_keys,scopes=oauth.SCOPES)
