@@ -31,7 +31,8 @@ def add_logo():
 
 add_logo()
 
-"# MODIS LST Downscaling ## -Rahul Harod"
+"# MODIS LST Downscaling"
+ ## -Rahul Harod
 def get_auth():
     service_account_keys=st.secrets['ee_keys']
     credentials=service_account.Credentials.from_service_account_info(service_account_keys,scopes=oauth.SCOPES)
