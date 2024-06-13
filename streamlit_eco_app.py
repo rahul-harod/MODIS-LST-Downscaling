@@ -26,30 +26,8 @@ from typing import Optional, Callable
 final_res=30
 st.set_page_config(layout="wide")
 
-# def add_logo():
-#     st.sidebar.image("iitb_logo.png", width=200)
-
 def add_logo():
-    st.sidebar.markdown(
-        """
-        <style>
-        .sidebar .centered-logo {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 150px;  /* Adjust the height as needed */
-        }
-        .sidebar img {
-            max-width: 100%;
-            height: auto;
-        }
-        </style>
-        <div class="centered-logo">
-            <img src="iitb_logo.png" width="200">
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    st.sidebar.image("iitb_logo.png", width=200)
 
 add_logo()
 
