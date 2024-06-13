@@ -1,0 +1,507 @@
+import wxee
+import base64
+import ee
+import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1.inset_locator import InsetPosition
+import rioxarray
+import pandas as pd
+import os
+import joblib
+import Landsat_S2_data
+import json
+from sklearn.preprocessing import StandardScaler
+from tensorflow.keras.models import model_from_json
+import streamlit as st
+from google.oauth2 import service_account
+from ee import oauth
+import resnet
+import xgboost as xgb
+from streamlit_folium import folium_static
+import folium
+from folium import plugins
+import geemap.foliumap as geemap
+from typing import Optional, Callable
+
+final_res=30
+st.set_page_config(layout="wide")
+
+def add_logo():
+    st.sidebar.image("iitb_logo.png", width=200)
+
+add_logo()
+
+"# MODIS LST Downscaling"
+def get_auth():
+    service_account_keys=st.secrets['ee_keys']
+    credentials=service_account.Credentials.from_service_account_info(service_account_keys,scopes=oauth.SCOPES)
+    ee.Initialize(credentials)
+    return 'Successfully sync to GEE'
+    
+get_auth()    
+
+
+selected_model='ANN'
+selected_lst_type = 'Aqua_day'
+
+targetProjection = ee.Projection('EPSG:32643')
+ERA5 = ee.ImageCollection("ECMWF/ERA5_LAND/HOURLY")
+DEM = ee.Image("USGS/SRTMGL1_003")
+L8 = ee.ImageCollection("LANDSAT/LC08/C02/T1_L2")
+L9 = ee.ImageCollection("LANDSAT/LC09/C02/T1_L2")
+
+lst_paths = {
+    'Terra_day': {
+        'Modis': "MODIS/061/MOD11A1",
+        'MODIS_Ref_500': "MODIS/061/MOD09GA",
+        'LST_band':'LST_Day_1km',
+    },
+    'Aqua_day': {
+        'Modis': "MODIS/061/MYD11A1",
+        'MODIS_Ref_500': "MODIS/061/MYD09GA",
+        'LST_band':'LST_Day_1km',
+    },
+    'Terra_night': {
+        'Modis': "MODIS/061/MOD11A1",
+        'MODIS_Ref_500': "MODIS/061/MOD09GA",
+        'LST_band':'LST_Night_1km'
+    },
+    'Aqua_night': {
+        'Modis': "MODIS/061/MYD11A1",
+        'MODIS_Ref_500': "MODIS/061/MYD09GA",
+        'LST_band':'LST_Night_1km'
+    },
+}
+
+def Upscale(img):
+    return img.reduceResolution(reducer=ee.Reducer.mean(), maxPixels=1024).reproject(crs=targetProjection, scale=final_res)
+
+def addBandsToModis(img,LST_band):
+    thermalBands = img.select(LST_band).multiply(0.02).rename('MODIS_LST')
+    opticalBands = img.select('sur_refl_b.*').multiply(0.0001)
+    return img.addBands([thermalBands, opticalBands], None, True)
+
+def downsampledMODIS_LST(img,clip_roi):
+    original_lst=img.select('MODIS_LST').rename('Original_MODIS_LST')
+    return img.resample('bilinear').reproject(crs=targetProjection, scale=final_res).addBands(original_lst).clip(clip_roi)
+    
+def calculateTimeDifference(modisImage, landsatImage):
+    modisDate = modisImage.date()
+    landsatDate = landsatImage.date()
+    return landsatDate.difference(modisDate, 'day').abs()
+
+def add_time_difference(modisImage,landsat_image):
+    difference = calculateTimeDifference(modisImage, landsat_image)
+    inverted_time_diff = ee.Image.constant(1).divide(difference)
+    return landsat_image.addBands(inverted_time_diff.rename('time_difference')).float()
+
+def get_nc_download_link(ds, file_name='Downscaled_LST.nc'):
+    nc_bytes = ds.to_netcdf()  # Convert xarray dataset to NetCDF bytes
+    nc_b64 = base64.b64encode(nc_bytes).decode()  # Encode NetCDF bytes to base64
+    href = f'<a href="data:file/nc;base64,{nc_b64}" download="{file_name}">Download NetCDF file</a>'
+    return href
+
+def get_png_download_link(f, file_name='Downscaled_LST_Map.png'):
+    # Save the plot as PNG
+    f.savefig(file_name, dpi=600)
+    
+    # Read the saved PNG file
+    with open(file_name, 'rb') as f_png:
+        png_bytes = f_png.read()
+
+    # Encode PNG bytes to base64
+    png_b64 = base64.b64encode(png_bytes).decode()
+    
+    # Generate the download link
+    href = f'<a href="data:file/png;base64,{png_b64}" download="{file_name}">Download PNG file</a>'
+    return href
+
+def downscale(date,point, clip_roi, Modis, MODIS_Ref_500,LST_band):
+    st.write('Date',date)
+    elevation = DEM.clip(clip_roi)
+    elevation = Upscale(elevation).rename('Elevation')
+    
+    start = ee.Date(date)
+    end = start.advance(1,'day')
+
+    landsat = Landsat_S2_data.Harmonized_LS(start,clip_roi)
+    Modis = Modis.filterDate(start, end).select(LST_band)
+    MODIS_Ref_500 = MODIS_Ref_500.filterDate(start, end).select(['sur_refl_b07'])
+    Modis = Modis.combine(MODIS_Ref_500).first()
+    
+    # Map the time difference calculation function over the Landsat collection
+    sorted_landsat = landsat.map(lambda landsat_image: landsat_image.addBands(add_time_difference(Modis, landsat_image)))
+
+    # Identify the closest Landsat image based on the inverted time difference
+    closest_landsat_image = sorted_landsat.qualityMosaic('time_difference').clip(clip_roi)
+
+    Modis = addBandsToModis(Modis,LST_band)
+    Modis=downsampledMODIS_LST(Modis, clip_roi).select([ 'sur_refl_b07','MODIS_LST','Original_MODIS_LST'])
+    modisWithClosestLandsat = Modis.addBands([elevation, closest_landsat_image])
+    return modisWithClosestLandsat
+
+scaler_X = None
+scaler_y = None
+best_model = None
+
+def load_model_and_scaler_ANN(model_name,selected_lst_type):
+    global scaler_X, scaler_y, best_model
+    model_dir = f"Models/{model_name}/"
+    scaler_X = joblib.load(model_dir + "152_ANN_scaler_X_"+selected_lst_type+".pkl")
+    scaler_y = joblib.load(model_dir + "152_ANN_scaler_y_"+selected_lst_type+".pkl")
+    
+    with open(model_dir + "152_ANN_architecture_night.json", "r") as json_file:
+        loaded_model_json = json_file.read()
+
+    best_model = model_from_json(loaded_model_json)
+    best_model.load_weights(model_dir + "152_ANN_Weights_"+selected_lst_type+".h5")
+
+
+def plot_xarray_on_folium(ds, variable,min,max,clip_roi, colormap='jet', zoom_start=10):
+    # Extract data
+    data = ds[variable].values.astype(np.float64)
+    lat = ds['y'].values.astype(np.float64)
+    lon = ds['x'].values.astype(np.float64)
+    
+    # Normalize data for colormap
+    normed_data = (data - min) / (max - min)
+    cm = plt.get_cmap(colormap)
+    colored_data = cm(normed_data)
+    
+    # Flip the data to match Folium's expectations
+    # colored_data = np.flipud(colored_data)
+    
+    # Create a Folium map 
+    m = geemap.Map()
+    url = 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}'
+    m.add_tile_layer(url, name='Google Map', attribution='Google')
+    m.addLayer(ee.FeatureCollection(clip_roi).style(**style), {}, 'roi')
+    m.centerObject(clip_roi, 11)
+    
+    
+    # Add the image overlay to the map
+    folium.raster_layers.ImageOverlay(
+        name='Downscaled LST',
+        image=colored_data,
+        bounds=[[lat.min(), lon.min()], [lat.max(), lon.max()]],
+        # mercator_project=True,
+        interactive=True,
+        colormap=cm,
+        opacity=0.7
+    ).add_to(m)
+    
+    # Add fullscreen button
+    # plugins.LayerControl().add_to(m)
+    m.to_streamlit(height=450)
+
+    
+            
+    
+def Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_model,clip_roi):
+    bands_ANN=['MODIS_LST', 'sur_refl_b07', 'NDVI', 'NDBI', 'NDWI', 'Elevation']
+
+    data = modisWithClosestLandsat.wx.to_xarray(scale=final_res, crs='EPSG:4326')
+    df = data.to_dataframe()
+    df.reset_index(inplace=True)
+    df.drop(columns=['spatial_ref'], inplace=True)
+    df1 = df[bands_ANN]
+    df1.dropna(inplace=True)
+    if len(df1) < 50:
+        st.markdown("<div style='text-align:center; color:red; font-weight:bold; font-size:30px;'>No data available!</div>", unsafe_allow_html=True)
+        return
+    
+    load_model_and_scaler_ANN(selected_model,selected_lst_type)
+    X_test = scaler_X.transform(df1[bands_ANN])
+    y_pred = best_model.predict(X_test)
+    df1['ANN_LST'] = scaler_y.inverse_transform(y_pred)
+
+    merged_df = df.merge(df1['ANN_LST'], how='left', left_index=True, right_index=True)
+    merged_df.set_index(['y', 'x'], inplace=True)
+    merged_df = merged_df.to_xarray()
+    data['ANN_LST'] = merged_df['ANN_LST']
+    data['ANN_LST'].attrs = {'long_name': 'ANN LST (K)', 'AREA_OR_POINT': 'Area', 'grid_mapping': 'spatial_ref'}
+    data['Original_MODIS_LST'].attrs = {'long_name': 'MODIS LST (K)', 'AREA_OR_POINT': 'Area', 'grid_mapping': 'spatial_ref'}
+
+
+    # Plot multiple images in subplots
+    min_1 = np.nanpercentile(df1['ANN_LST'], 1)
+    max_1 = np.nanpercentile(df1['ANN_LST'], 99)
+
+    min_2 = np.nanpercentile(df1['MODIS_LST'], 1)
+    max_2 = np.nanpercentile(df1['MODIS_LST'], 99)
+
+    min_ = min(min_1, min_2)
+    max_ = max(max_1, max_2)
+    
+    fig, (ax1, ax2,cax) = plt.subplots(ncols=3 ,figsize=(8, 3.5),gridspec_kw={"width_ratios":[1,1,0.05]})
+    # fig.subplots_adjust(wspace=0.1)
+    im1 = data['Original_MODIS_LST'].plot(ax=ax1, cmap='jet', vmin=min_, vmax=max_,add_colorbar=False)
+    im2 = data['ANN_LST'].plot(ax=ax2, cmap='jet', vmin=min_, vmax=max_,add_colorbar=False)
+    
+    ax1.set_title('MODIS LST')
+    ax2.set_title('ANN LST')
+    ip = InsetPosition(ax2, [1.05,0,0.05,1]) 
+    cax.set_axes_locator(ip)
+    cbar=fig.colorbar(im2, cax=cax, ax=[ax1,ax2])
+    cbar.set_label('LST in Kelvin', size=12)
+
+    for ax in (ax1, ax2):
+        # ax.set_xticks([])
+        # ax.set_yticks([])
+        ax.set_xlabel('')
+        ax.set_ylabel('')
+        plt.tight_layout()
+    
+    # Convert the plot to an image for displaying in Streamlit
+    st.pyplot(fig)
+    st.markdown(get_nc_download_link(data[['Original_MODIS_LST','ANN_LST']],file_name=selected_lst_type+'_Downscaled_LST_'+date_str+'_'+selected_model+'.nc'), unsafe_allow_html=True)
+    st.markdown(get_png_download_link(fig, file_name=selected_lst_type+'_Downscaled_LST_Map_'+date_str+'_'+selected_model+'.png'), unsafe_allow_html=True)
+    
+    
+    plot_xarray_on_folium(data, 'ANN_LST',min_,max_,clip_roi)
+    # map_obj.to_streamlit(height=450)
+    pass
+
+
+def load_model_XGBoost(model_name,selected_lst_type):
+    global best_model
+    model_dir = f"Models/{model_name}/"
+    best_model = xgb.XGBRegressor()
+    best_model.load_model(model_dir + "18_XGBoost_"+selected_lst_type+"_LST_200.json")
+    
+def Predictions_XGBoost(modisWithClosestLandsat,date_str,selected_lst_type,selected_model,clip_roi):
+    bands_XGB=['MODIS_LST', 'sur_refl_b07', 'NDVI', 'NDBI', 'NDWI', 'Elevation']
+
+    data = modisWithClosestLandsat.wx.to_xarray(scale=final_res, crs='EPSG:4326')
+    df = data.to_dataframe()
+    df.reset_index(inplace=True)
+    df.drop(columns=['spatial_ref'], inplace=True)
+    df1 = df[bands_XGB]
+    df1.dropna(inplace=True)
+    if len(df1) < 50:
+        st.markdown("<div style='text-align:center; color:red; font-weight:bold; font-size:30px;'>No data available!</div>", unsafe_allow_html=True)
+        return
+    
+    load_model_XGBoost(selected_model,selected_lst_type)
+    df1['XGBoost_LST'] = best_model.predict(df1)
+
+    merged_df = df.merge(df1['XGBoost_LST'], how='left', left_index=True, right_index=True)
+    merged_df.set_index(['y', 'x'], inplace=True)
+    merged_df = merged_df.to_xarray()
+    data['XGBoost_LST'] = merged_df['XGBoost_LST']
+    data['XGBoost_LST'].attrs = {'long_name': 'XGBoost LST (K)', 'AREA_OR_POINT': 'Area', 'grid_mapping': 'spatial_ref'}
+    data['Original_MODIS_LST'].attrs = {'long_name': 'MODIS LST (K)', 'AREA_OR_POINT': 'Area', 'grid_mapping': 'spatial_ref'}
+    
+    # Plot multiple images in subplots
+    min_1 = np.nanpercentile(df1['XGBoost_LST'], 1)
+    max_1 = np.nanpercentile(df1['XGBoost_LST'], 99)
+
+    min_2 = np.nanpercentile(df1['MODIS_LST'], 1)
+    max_2 = np.nanpercentile(df1['MODIS_LST'], 99)
+
+    min_ = min(min_1, min_2)
+    max_ = max(max_1, max_2)
+    
+    fig, (ax1, ax2,cax) = plt.subplots(ncols=3 ,figsize=(8, 3.5),gridspec_kw={"width_ratios":[1,1,0.05]})
+    # fig.subplots_adjust(wspace=0.1)
+    im1 = data['Original_MODIS_LST'].plot(ax=ax1, cmap='jet', vmin=min_, vmax=max_,add_colorbar=False)
+    im2 = data['XGBoost_LST'].plot(ax=ax2, cmap='jet', vmin=min_, vmax=max_,add_colorbar=False)
+    
+    ax1.set_title('MODIS LST')
+    ax2.set_title('XGBoost LST')
+    ip = InsetPosition(ax2, [1.05,0,0.05,1]) 
+    cax.set_axes_locator(ip)
+    cbar=fig.colorbar(im2, cax=cax, ax=[ax1,ax2])
+    cbar.set_label('LST in Kelvin', size=12)
+
+    for ax in (ax1, ax2):
+        # ax.set_xticks([])
+        # ax.set_yticks([])
+        ax.set_xlabel('')
+        ax.set_ylabel('')
+        plt.tight_layout()
+    
+    # Convert the plot to an image for displaying in Streamlit
+    st.pyplot(fig)
+    st.markdown(get_nc_download_link(data[['Original_MODIS_LST','XGBoost_LST']],file_name=selected_lst_type+'_Downscaled_LST_'+date_str+'_'+selected_model+'.nc'), unsafe_allow_html=True)
+    st.markdown(get_png_download_link(fig, file_name=selected_lst_type+'_Downscaled_LST_Map_'+date_str+'_'+selected_model+'.png'), unsafe_allow_html=True)
+    
+    plot_xarray_on_folium(data, 'XGBoost_LST',min_,max_,clip_roi)
+    # map_obj.to_streamlit(height=450)   
+    
+    pass
+
+
+def load_model_and_scaler_ResNet(model_name,selected_lst_type):
+    global scaler_X, scaler_y, best_model
+    model_dir = f"Models/{model_name}/"
+    scaler_X = joblib.load(model_dir + "152_ANN_scaler_X_"+selected_lst_type+".pkl")
+    scaler_y = joblib.load(model_dir + "152_ANN_scaler_y_"+selected_lst_type+".pkl")
+    
+    with open(model_dir + "152_ANN_architecture_night.json", "r") as json_file:
+        loaded_model_json = json_file.read()
+
+    best_model = model_from_json(loaded_model_json)
+    best_model.load_weights(model_dir + "152_ANN_Weights_"+selected_lst_type+".h5")
+
+def load_model_and_scaler_ResNet(model_name,selected_lst_type,num_rows, num_Columns, n_bands):
+    global scaler_X, scaler_y, best_model
+    model_dir = f"Models/{model_name}/"
+    scaler=joblib.load(model_dir + "152_ANN_scaler_X_"+selected_lst_type+".pkl")
+    scaler_X = scaler['scaler_X']
+    scaler_y = scaler['scaler_y']
+
+    best_model = resnet.ResNet50(num_rows, num_Columns, n_bands)
+    best_model.load_weights(model_dir + "ResNet_734_Weights.h5")
+
+def Predictions_ResNet(modisWithClosestLandsat,date_str,selected_lst_type,selected_model):
+    bands_ResNet=['MODIS_LST', 'sur_refl_b07', 'NDVI', 'NDBI', 'NDWI', 'Elevation']
+    
+    data = modisWithClosestLandsat.wx.to_xarray(scale=final_res, crs='EPSG:4326')
+    data=data.isel(time=0)
+    nan_mask_modis = np.isnan(data['MODIS_LST'])
+    nan_mask_Landsat = np.isnan(data['NDVI'])
+    data = data.where(~nan_mask_modis, np.nan)
+    data = data.where(~nan_mask_Landsat, np.nan)
+    nan_mask=np.isnan(data['NDVI'])
+    count_nan=np.array(nan_mask).flatten()
+    count_true = np.count_nonzero(count_nan)
+    if count_true < 50:
+        st.markdown("<div style='text-align:center; color:red; font-weight:bold; font-size:30px;'>No data available!</div>", unsafe_allow_html=True)
+        return
+        
+    data1 = data.fillna(data.mean())
+    X_patches = np.stack([data1[var].values for var in bands_ResNet], axis=-1)
+    num_rows=X_patches.shape[0]
+    num_Columns=X_patches.shape[1]
+    
+    load_model_and_scaler_ResNet(selected_model,selected_lst_type,num_rows, num_Columns, 6)
+    X_all_beforenormalized = X_patches.reshape(-1, X_patches.shape[-1])
+    X_all_normalized = scaler_X.transform(X_all_beforenormalized)
+    X_all_normalized = X_all_normalized.reshape(X_patches.shape)
+    X_expanded = np.expand_dims(X_all_normalized, axis=0)
+    y_pred = best_model.predict(X_expanded)
+
+    y_pred_0 = scaler_y.inverse_transform(y_pred.reshape(-1, 1))
+    y_pred_1 = y_pred_0.reshape(num_rows,num_Columns)
+    
+    data['ResNet_LST']=(['y','x'],y_pred_1)
+    data['ResNet_LST'].attrs = {'long_name': 'ResNet_LST', 'AREA_OR_POINT': 'Area', 'grid_mapping': 'spatial_ref'}
+    nan_mask = np.isnan(data['LST_Day_1km'])
+    data = data.where(~nan_mask, np.nan)
+    data['MODIS_LST'].attrs = {'long_name': 'MODIS LST (K)', 'AREA_OR_POINT': 'Area', 'grid_mapping': 'spatial_ref'}
+    
+    # Plot multiple images in subplots
+    min_1 = np.nanpercentile(y_pred_0, 1)
+    max_1 = np.nanpercentile(y_pred_0, 99)
+
+    min_2 = np.nanpercentile(X_all_beforenormalized[:,-1], 1)
+    max_2 = np.nanpercentile(X_all_beforenormalized[:,-1], 99)
+
+    min_ = min(min_1, min_2)
+    max_ = max(max_1, max_2)
+    
+    fig, (ax1, ax2,cax) = plt.subplots(ncols=3 ,figsize=(8, 3.5),gridspec_kw={"width_ratios":[1,1,0.05]})
+    # fig.subplots_adjust(wspace=0.1)
+    im1 = data['MODIS_LST'].plot(ax=ax1, cmap='jet', vmin=min_, vmax=max_,add_colorbar=False)
+    im2 = data['ResNet_LST'].plot(ax=ax2, cmap='jet', vmin=min_, vmax=max_,add_colorbar=False)
+    
+    ax1.set_title('MODIS LST')
+    ax2.set_title('ResNet LST')
+    ip = InsetPosition(ax2, [1.05,0,0.05,1]) 
+    cax.set_axes_locator(ip)
+    cbar=fig.colorbar(im2, cax=cax, ax=[ax1,ax2])
+    cbar.set_label('LST in Kelvin', size=12)
+
+    for ax in (ax1, ax2):
+        # ax.set_xticks([])
+        # ax.set_yticks([])
+        ax.set_xlabel('')
+        ax.set_ylabel('')
+        plt.tight_layout()
+    
+    # Convert the plot to an image for displaying in Streamlit
+    st.pyplot(fig)
+    st.markdown(get_nc_download_link(data[['MODIS_LST','ResNet_LST']],file_name=selected_lst_type+'_Downscaled_LST_'+date_str+'_'+selected_model+'.nc'), unsafe_allow_html=True)
+    st.markdown(get_png_download_link(fig, file_name=selected_lst_type+'_Downscaled_LST_Map_'+date_str+'_'+selected_model+'.png'), unsafe_allow_html=True)
+    pass
+
+
+# def display_map(lat, lon, zoom=10):
+#     try:
+#         # Create a folium map centered at the given latitude and longitude
+#         folium_map = folium.Map(location=[lat, lon], zoom_start=zoom)
+#         # Add layer control to the map
+#         folium.LayerControl().add_to(folium_map)
+#         # Display the map using streamlit_folium
+#         folium_static(folium_map, width=300, height=300)
+#     except Exception as e:
+#         st.error(f"Error displaying map: {str(e)}")
+
+style = {'color': '#FFFF00',
+        'width': 2,
+        'lineType': 'solid',
+        'fillColor': '00000000'
+        }
+        
+    
+# Function to process user input and display the map
+def user_input_map(lat, lon, buffer_size, date):
+    try:
+        date_str = date.strftime('%Y-%m-%d')
+        # Create a point geometry
+        point = ee.Geometry.Point(lon, lat)
+        # Create a buffer around the point
+        clip_roi = point.buffer(buffer_size).bounds()
+
+        m = geemap.Map()
+        url = 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}'
+        m.add_tile_layer(url, name='Google Map', attribution='Google')
+        
+        m.addLayer(ee.FeatureCollection(clip_roi).style(**style), {}, 'roi')
+        m.centerObject(clip_roi, 11)
+        m.to_streamlit(height=450)
+        
+        return point, clip_roi, date_str
+    except Exception as e:
+        st.error(f"An error occurred: {str(e)}")
+        return None, None, None
+
+
+def main():
+    global selected_lst_type,Modis, MODIS_Ref_250, MODIS_Ref_500, ERA5,ERA_hour,LST_band,selected_model,final_res
+    st.sidebar.title("Enter Search Criteria")
+    lat = st.sidebar.number_input("Latitude", value=30.72)
+    lon = st.sidebar.number_input("Longitude", value=76.78)
+    radius = st.sidebar.number_input("Square Buffer distance (m)", value=8000)
+    date_input = st.sidebar.date_input("Date", value=pd.Timestamp('2024-03-14'))
+    
+
+    lst_types = ['Aqua_day', 'Aqua_night', 'Terra_day', 'Terra_night']
+    selected_lst_type = st.sidebar.selectbox("Select LST Type", lst_types, index=lst_types.index(selected_lst_type))
+
+    Model_types = ['ANN' ,'XGBoost']
+    selected_model = st.sidebar.selectbox("Select Model", Model_types, index=Model_types.index(selected_model))
+
+    res_types=[30,100]
+    final_res= st.sidebar.selectbox("Downscale Resolution", res_types, index=res_types.index(final_res))
+
+    # Update variables based on the selected LST type
+    Modis = ee.ImageCollection(lst_paths[selected_lst_type]['Modis'])
+    MODIS_Ref_500 = ee.ImageCollection(lst_paths[selected_lst_type]['MODIS_Ref_500'])
+    LST_band=lst_paths[selected_lst_type]['LST_band']
+    # Run the code when the user clicks the button
+    if st.sidebar.button("Submit"):
+        point,clip_roi,date_str=user_input_map(lat, lon, radius, date_input)
+        st.write(selected_lst_type+': '+selected_model)
+        modisWithClosestLandsat = downscale(date_str,point, clip_roi, Modis, MODIS_Ref_500,LST_band)
+        if selected_model in ['ANN']:
+            Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_model,clip_roi)
+
+        if selected_model in ['XGBoost']:
+            Predictions_XGBoost(modisWithClosestLandsat,date_str,selected_lst_type,selected_model,clip_roi)
+
+        st.sidebar.success("Code execution completed successfully!")
+
+if __name__ == "__main__":
+    main()
