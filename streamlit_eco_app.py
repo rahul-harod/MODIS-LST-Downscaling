@@ -47,6 +47,8 @@ st.markdown(
     .name {
         font-size: 1em;
         color: gray;
+        font-weight: bold;
+        
     }
     </style>
     <div class="header">
