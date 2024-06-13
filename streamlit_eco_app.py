@@ -31,8 +31,12 @@ def add_logo():
 
 add_logo()
 
-"# MODIS LST Downscaling"
- "## -Rahul Harod"
+# Title of the app
+st.markdown("# MODIS LST Downscaling")
+
+# Your name in smaller font size
+st.markdown("<h4 style='text-align: left; color: gray;'>- Rahul Harod</h4>", unsafe_allow_html=True)
+
 def get_auth():
     service_account_keys=st.secrets['ee_keys']
     credentials=service_account.Credentials.from_service_account_info(service_account_keys,scopes=oauth.SCOPES)
