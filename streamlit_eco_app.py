@@ -41,7 +41,7 @@ st.markdown(
         align-items: center;
     }
     .title {
-        font-size: 2em;
+        font-size: 3em;
         font-weight: bold;
     }
     .name {
