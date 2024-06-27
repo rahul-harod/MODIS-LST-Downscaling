@@ -453,16 +453,6 @@ def Predictions_ResNet(modisWithClosestLandsat,date_str,selected_lst_type,select
     pass
 
 
-# def display_map(lat, lon, zoom=10):
-#     try:
-#         # Create a folium map centered at the given latitude and longitude
-#         folium_map = folium.Map(location=[lat, lon], zoom_start=zoom)
-#         # Add layer control to the map
-#         folium.LayerControl().add_to(folium_map)
-#         # Display the map using streamlit_folium
-#         folium_static(folium_map, width=300, height=300)
-#     except Exception as e:
-#         st.error(f"Error displaying map: {str(e)}")
 
 style = {'color': '#FFFF00',
         'width': 2,
@@ -506,7 +496,7 @@ def main():
     lst_types = ['Aqua_day', 'Aqua_night', 'Terra_day', 'Terra_night']
     selected_lst_type = st.sidebar.selectbox("Select LST Type", lst_types, index=lst_types.index(selected_lst_type))
 
-    Model_types = ['ANN' ,'ResNet']
+    Model_types = ['ANN' ,'ResNet','XGBoost']
     selected_model = st.sidebar.selectbox("Select Model", Model_types, index=Model_types.index(selected_model))
 
     res_types=[30,100]
@@ -524,7 +514,7 @@ def main():
         if selected_model in ['ANN']:
             Predictions_ANN(modisWithClosestLandsat,date_str,selected_lst_type,selected_model,clip_roi)
 
-        if selected_model in ['ResNet']:
+        if selected_model in ['XGBoost']:
             Predictions_XGBoost(modisWithClosestLandsat,date_str,selected_lst_type,selected_model,clip_roi)
 
         st.sidebar.success("Code execution completed successfully!")
