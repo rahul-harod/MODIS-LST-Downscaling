@@ -496,7 +496,7 @@ def main():
     lst_types = ['Aqua_day', 'Aqua_night', 'Terra_day', 'Terra_night']
     selected_lst_type = st.sidebar.selectbox("Select LST Type", lst_types, index=lst_types.index(selected_lst_type))
 
-    Model_types = ['ANN' ,'ResNet','XGBoost']
+    Model_types = ['ANN' ,'XGBoost']
     selected_model = st.sidebar.selectbox("Select Model", Model_types, index=Model_types.index(selected_model))
 
     res_types=[30,100]
